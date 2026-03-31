@@ -1,0 +1,58 @@
+package com.yowpainter.modules.auth.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.yowpainter.modules.auth.repository.AppUserRepository;
+import com.yowpainter.modules.auth.entity.AppUser;
+import com.yowpainter.modules.auth.dto.UpdateProfilePictureRequest;
+import com.yowpainter.modules.auth.dto.BuyerProfileResponse;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@RestController
+@RequestMapping("/api/buyer")
+@RequiredArgsConstructor
+@Tag(name = "Buyer Profile", description = "Gestion du profil Acheteur")
+public class BuyerController {
+
+    private final AppUserRepository userRepository;
+
+    @GetMapping("/me")
+    @Operation(summary = "Récupérer le profil de l'acheteur connecté")
+    public ResponseEntity<BuyerProfileResponse> getMe(@AuthenticationPrincipal UserDetails userDetails) {
+        AppUser user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+        return ResponseEntity.ok(mapToResponse(user));
+    }
+
+    @PutMapping("/me/profile-picture")
+    @Operation(summary = "Mettre à jour la photo de profil de l'acheteur")
+    public ResponseEntity<BuyerProfileResponse> updateProfilePicture(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UpdateProfilePictureRequest request) {
+        AppUser user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+        user.setProfilePictureUrl(request.getProfilePictureUrl());
+        return ResponseEntity.ok(mapToResponse(userRepository.save(user)));
+    }
+
+    private BuyerProfileResponse mapToResponse(AppUser user) {
+        return BuyerProfileResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .role(user.getRole().name())
+                .build();
+    }
+}

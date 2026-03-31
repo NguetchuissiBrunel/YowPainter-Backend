@@ -1,0 +1,76 @@
+package com.yowpainter.modules.auth.controller;
+
+import java.util.List;
+
+import com.yowpainter.modules.auth.dto.AuthResponse;
+import com.yowpainter.modules.auth.dto.LoginRequest;
+import com.yowpainter.modules.auth.dto.RegisterRequest;
+import com.yowpainter.modules.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Endpoints pour s'inscrire et se connecter")
+public class AuthController {
+
+    private final AuthService authService;
+
+    @GetMapping("/roles")
+    @Operation(summary = "Lister les roles disponibles pour l'inscription")
+    public ResponseEntity<List<String>> getRoles() {
+        return ResponseEntity.ok(authService.getAvailableRoles());
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Inscription d'un nouvel utilisateur (Artiste ou Acheteur)")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        if (request.getRole() == com.yowpainter.modules.auth.entity.UserRole.ROLE_ADMIN) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(AuthResponse.builder()
+                    .message(e.getMessage())
+                    .build()); 
+        }
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Connexion et recuperation du token JWT")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Rafraichir le token JWT")
+    public ResponseEntity<AuthResponse> refresh(@RequestParam String refreshToken) {
+        try {
+            return ResponseEntity.ok(authService.refreshToken(refreshToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(AuthResponse.builder()
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Se deconnecter")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails instanceof com.yowpainter.modules.auth.entity.AppUser) {
+            authService.logout((com.yowpainter.modules.auth.entity.AppUser) userDetails);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
+}

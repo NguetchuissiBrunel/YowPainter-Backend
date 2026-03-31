@@ -1,0 +1,146 @@
+package com.yowpainter.modules.artwork.controller;
+
+import com.yowpainter.modules.artwork.dto.ArtworkCreateRequest;
+import com.yowpainter.modules.artwork.dto.ArtworkResponse;
+import com.yowpainter.modules.artwork.dto.CommentRequest;
+import com.yowpainter.modules.artwork.dto.CommentResponse;
+import com.yowpainter.modules.artwork.entity.ArtworkStatus;
+import com.yowpainter.modules.artwork.entity.ArtworkStyle;
+import com.yowpainter.modules.artwork.entity.ArtworkTechnique;
+import com.yowpainter.modules.artwork.service.ArtworkService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+@Tag(name = "Artworks", description = "Gestion complete des oeuvres (Public & Artist)")
+public class ArtworkController {
+
+    private final ArtworkService artworkService;
+
+    @GetMapping("/v1/public/{artistSlug}/artworks")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Lister les oeuvres d'une boutique (tenant spécifique)")
+    public ResponseEntity<List<ArtworkResponse>> getAllPublicArtworks(@PathVariable String artistSlug) {
+        return ResponseEntity.ok(artworkService.getPublicArtworks());
+    }
+
+    @GetMapping("/v1/public/{artistSlug}/artworks/{id}")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Voir les details d'une oeuvre dans une boutique")
+    public ResponseEntity<ArtworkResponse> getArtwork(@PathVariable String artistSlug, @PathVariable UUID id) {
+        return ResponseEntity.ok(artworkService.getArtworkById(id));
+    }
+
+    @GetMapping("/v1/public/{artistSlug}/artworks/search")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Rechercher des oeuvres dans une boutique spécifique")
+    public ResponseEntity<List<ArtworkResponse>> searchArtworks(@PathVariable String artistSlug, @RequestParam String q) {
+        return ResponseEntity.ok(artworkService.searchArtworks(q));
+    }
+
+    @PostMapping("/artworks")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Créer une oeuvre (Artiste)")
+    public ResponseEntity<ArtworkResponse> createArtwork(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ArtworkCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(artworkService.createArtwork(userDetails.getUsername(), request));
+    }
+
+    @GetMapping("/public/artworks/featured")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Recuperer les oeuvres mises en avant")
+    public ResponseEntity<List<ArtworkResponse>> getFeatured() {
+        return ResponseEntity.ok(artworkService.getFeaturedArtworks());
+    }
+
+    @PostMapping("/artworks/{id}/like")
+    @PreAuthorize("hasAnyRole('ARTIST', 'BUYER')")
+    @Operation(summary = "Liker ou unliker une oeuvre")
+    public ResponseEntity<Void> toggleLike(@PathVariable UUID id, @AuthenticationPrincipal UserDetails userDetails) {
+        artworkService.toggleLike(id, userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/artworks/{id}/comments")
+    @PreAuthorize("hasAnyRole('ARTIST', 'BUYER')")
+    @Operation(summary = "Ajouter un commentaire")
+    public ResponseEntity<CommentResponse> addComment(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody CommentRequest request) {
+        return ResponseEntity.ok(artworkService.addComment(id, userDetails.getUsername(), request));
+    }
+
+    @GetMapping("/public/artworks/{id}/comments")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Lister les commentaires d'une oeuvre")
+    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable UUID id) {
+        return ResponseEntity.ok(artworkService.getComments(id));
+    }
+
+    @PutMapping("/artworks/{id}")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Modifier une oeuvre (Artiste proprietaire)")
+    public ResponseEntity<ArtworkResponse> updateArtwork(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ArtworkCreateRequest request) {
+        return ResponseEntity.ok(artworkService.updateArtwork(id, userDetails.getUsername(), request));
+    }
+
+    @PatchMapping("/artworks/{id}/status")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Changer l'etat d'une oeuvre (PUBLISHED, ON_SALE, ARCHIVED...)")
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam ArtworkStatus status) {
+        artworkService.updateStatus(id, userDetails.getUsername(), status);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/artworks/bulk-delete")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Suppression groupée d'oeuvres")
+    public ResponseEntity<Void> bulkDelete(@RequestBody List<UUID> ids, @AuthenticationPrincipal UserDetails userDetails) {
+        artworkService.bulkDeleteArtworks(ids, userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/artworks/bulk-status")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Mise à jour groupée du statut")
+    public ResponseEntity<Void> bulkUpdateStatus(@RequestBody List<UUID> ids, @RequestParam ArtworkStatus status, @AuthenticationPrincipal UserDetails userDetails) {
+        artworkService.bulkUpdateStatus(ids, userDetails.getUsername(), status);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/public/artworks/metadata/styles")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Lister les styles disponibles pour les filtres")
+    public ResponseEntity<List<ArtworkStyle>> getStyles() {
+        return ResponseEntity.ok(artworkService.getStyles());
+    }
+
+    @GetMapping("/public/artworks/metadata/techniques")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Lister les techniques disponibles pour les filtres")
+    public ResponseEntity<List<ArtworkTechnique>> getTechniques() {
+        return ResponseEntity.ok(artworkService.getTechniques());
+    }
+}
