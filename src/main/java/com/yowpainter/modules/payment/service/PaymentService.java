@@ -34,6 +34,8 @@ public class PaymentService {
     private final CampayClient campayClient;
     private final com.yowpainter.modules.notification.service.NotificationService notificationService;
     private final com.yowpainter.modules.artist.repository.ArtistRepository artistRepository;
+    private final com.yowpainter.modules.auth.service.EmailService emailService;
+    private final com.yowpainter.shared.tenant.TenantContext tenantContext; // Still use static usually, but injecting for visibility or just using static
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
@@ -78,6 +80,7 @@ public class PaymentService {
                     .status(PaymentStatus.PENDING)
                     .providerReference(collectResponse.getReference())
                     .phoneNumber(phoneNumber)
+                    .tenantId(tenantId)
                     .build();
             paymentRepository.save(payment);
 
@@ -99,7 +102,7 @@ public class PaymentService {
                 .orElseThrow(() -> new IllegalArgumentException("Paiement non trouve pour la reference: " + referenceId));
 
         if (payment.getStatus() == PaymentStatus.SUCCEEDED) {
-            log.warn("Payment already processed for refernece: {}", referenceId);
+            log.warn("Payment already processed for reference: {}", referenceId);
             return;
         }
 
@@ -107,21 +110,60 @@ public class PaymentService {
         payment.setProviderReference(providerReference);
         paymentRepository.save(payment);
 
-        String type = payment.getReferenceType();
-        UUID userId = payment.getUserId();
+        AppUser user = userRepository.findById(payment.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouve"));
 
-        // Déclencher la logique métier associée
-        if ("ORDER".equals(type)) {
-            shopService.updateOrderStatus(referenceId, OrderStatus.PAID);
-            notificationService.createNotification(userId, "Votre commande #" + referenceId.toString().substring(0, 8) + " a été payée avec succès via Mobile Money !");
-        } else if ("RESERVATION".equals(type)) {
-            eventService.confirmPaidReservation(referenceId);
-            notificationService.createNotification(userId, "Votre réservation pour l'événement a été confirmée !");
+        // Déclencher la logique métier associée dans le bon schéma
+        try {
+            com.yowpainter.shared.tenant.TenantContext.setTenantId(payment.getTenantId());
+            
+            String referenceType = payment.getReferenceType();
+            UUID userId = payment.getUserId();
+
+            if ("ORDER".equals(referenceType)) {
+                shopService.updateOrderStatus(referenceId, OrderStatus.PAID);
+                notificationService.createNotification(userId, "Votre commande #" + referenceId.toString().substring(0, 8) + " a été payée avec succès !");
+                emailService.sendPaymentConfirmation(user.getEmail(), referenceId.toString().substring(0, 8), payment.getAmount());
+                
+                // Notifier l'artiste
+                var artist = artistRepository.findBySlug(payment.getTenantId());
+                artist.ifPresent(a -> emailService.sendNewSaleNotification(a.getEmail(), referenceId.toString().substring(0, 8), payment.getAmount()));
+                
+            } else if ("RESERVATION".equals(referenceType)) {
+                eventService.confirmPaidReservation(referenceId);
+                notificationService.createNotification(userId, "Votre réservation a été confirmée !");
+                emailService.sendPaymentConfirmation(user.getEmail(), "Réservation #" + referenceId.toString().substring(0, 8), payment.getAmount());
+                
+                // Notifier l'artiste
+                var artist = artistRepository.findBySlug(payment.getTenantId());
+                artist.ifPresent(a -> emailService.sendNewSaleNotification(a.getEmail(), "Nouvelle réservation", payment.getAmount()));
+            }
+        } finally {
+            com.yowpainter.shared.tenant.TenantContext.clear();
+        }
+    }
+
+    @Transactional
+    public void processFailedPayment(String providerReference, String externalReference, String status) {
+        UUID referenceId = UUID.fromString(externalReference);
+        log.warn("Processing failed payment for reference: {} with status: {}", referenceId, status);
+
+        Payment payment = paymentRepository.findByReferenceId(referenceId)
+                .orElseThrow(() -> new IllegalArgumentException("Paiement non trouve pour la reference: " + referenceId));
+
+        if (payment.getStatus() == PaymentStatus.SUCCEEDED) {
+            log.warn("Attempt to fail an already SUCCEEDED payment: {}", referenceId);
+            return;
         }
 
-        // Optionnel : Notifier l'artiste (si le tenant est lié)
-        // Note: Dans le code Stripe, on récupérait le tenantSlug depuis les metadata.
-        // Ici, on pourrait le stocker dans Payment ou le récupérer via la reference.
+        payment.setStatus(PaymentStatus.FAILED);
+        payment.setProviderReference(providerReference);
+        paymentRepository.save(payment);
+
+        // Notifier l'utilisateur
+        notificationService.createNotification(payment.getUserId(), "Le paiement pour votre " + 
+                (payment.getReferenceType().equals("ORDER") ? "commande" : "réservation") + 
+                " a échoué. (" + status + ")");
     }
 
     private PaymentResponse mapToPaymentResponse(Payment payment) {

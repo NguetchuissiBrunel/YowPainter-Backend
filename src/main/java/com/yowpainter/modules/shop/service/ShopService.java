@@ -102,11 +102,6 @@ public class ShopService {
         order.addItem(OrderItem.builder().product(product).quantity(request.getQuantity()).unitPrice(product.getPrice()).build());
         order = orderRepository.save(order);
 
-        // Record payment simulation
-        paymentRepository.save(Payment.builder()
-                .userId(buyer.getId()).referenceId(order.getId()).referenceType("ORDER")
-                .amount(totalPrice).currency("EUR").status(PaymentStatus.PENDING).build());
-
         return mapToOrderResponse(order);
     }
 

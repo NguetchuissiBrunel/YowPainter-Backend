@@ -15,4 +15,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findAllByOrderByCreatedAtDesc();
 
     List<Order> findByStatusAndCreatedAtBefore(com.yowpainter.modules.shop.entity.OrderStatus status, java.time.LocalDateTime dateTime);
+
+    long countByStatus(com.yowpainter.modules.shop.entity.OrderStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = :status")
+    java.math.BigDecimal sumTotalAmountByStatus(@org.springframework.data.repository.query.Param("status") com.yowpainter.modules.shop.entity.OrderStatus status);
 }

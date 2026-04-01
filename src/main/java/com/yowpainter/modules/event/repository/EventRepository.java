@@ -23,4 +23,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     @Query("SELECT DISTINCT e.location FROM Event e WHERE e.location IS NOT NULL")
     List<String> findDistinctLocations();
+
+    long countByStatusAndStartDateTimeAfter(EventStatus status, LocalDateTime now);
 }

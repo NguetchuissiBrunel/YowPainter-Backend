@@ -68,28 +68,34 @@ public class ArtworkController {
         return ResponseEntity.ok(artworkService.getFeaturedArtworks());
     }
 
-    @PostMapping("/artworks/{id}/like")
+    @PostMapping("/v1/public/{artistSlug}/artworks/{id}/like")
     @PreAuthorize("hasAnyRole('ARTIST', 'BUYER')")
-    @Operation(summary = "Liker ou unliker une oeuvre")
-    public ResponseEntity<Void> toggleLike(@PathVariable UUID id, @AuthenticationPrincipal UserDetails userDetails) {
+    @Operation(summary = "Liker ou unliker une oeuvre dans une boutique spécifique")
+    public ResponseEntity<Void> toggleLike(
+            @PathVariable String artistSlug,
+            @PathVariable UUID id, 
+            @AuthenticationPrincipal UserDetails userDetails) {
         artworkService.toggleLike(id, userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/artworks/{id}/comments")
+    @PostMapping("/v1/public/{artistSlug}/artworks/{id}/comments")
     @PreAuthorize("hasAnyRole('ARTIST', 'BUYER')")
-    @Operation(summary = "Ajouter un commentaire")
+    @Operation(summary = "Ajouter un commentaire sur une oeuvre spécifique")
     public ResponseEntity<CommentResponse> addComment(
+            @PathVariable String artistSlug,
             @PathVariable UUID id,
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody CommentRequest request) {
         return ResponseEntity.ok(artworkService.addComment(id, userDetails.getUsername(), request));
     }
 
-    @GetMapping("/public/artworks/{id}/comments")
+    @GetMapping("/v1/public/{artistSlug}/artworks/{id}/comments")
     @PreAuthorize("permitAll()")
-    @Operation(summary = "Lister les commentaires d'une oeuvre")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable UUID id) {
+    @Operation(summary = "Lister les commentaires d'une oeuvre spécifique")
+    public ResponseEntity<List<CommentResponse>> getComments(
+            @PathVariable String artistSlug,
+            @PathVariable UUID id) {
         return ResponseEntity.ok(artworkService.getComments(id));
     }
 

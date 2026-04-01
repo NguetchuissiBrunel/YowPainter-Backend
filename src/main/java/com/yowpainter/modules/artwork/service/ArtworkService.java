@@ -10,6 +10,7 @@ import com.yowpainter.modules.artwork.repository.ArtworkRepository;
 import com.yowpainter.modules.auth.entity.AppUser;
 import com.yowpainter.modules.auth.repository.AppUserRepository;
 import com.yowpainter.modules.shop.repository.ProductRepository;
+import com.yowpainter.modules.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ArtworkService {
     private final ArtworkLikeRepository likeRepository;
     private final ArtworkCommentRepository commentRepository;
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ArtworkResponse createArtwork(String artistEmail, ArtworkCreateRequest request) {
@@ -99,6 +101,12 @@ public class ArtworkService {
         } else {
             likeRepository.save(ArtworkLike.builder().artwork(artwork).user(user).build());
             artwork.setLikeCount(artwork.getLikeCount() + 1);
+            
+            // Notification pour l'artiste
+            notificationService.createNotification(
+                artwork.getArtistId(),
+                user.getFirstName() + " a aimé votre œuvre : " + artwork.getTitle()
+            );
         }
         artworkRepository.save(artwork);
     }
@@ -117,6 +125,13 @@ public class ArtworkService {
                 .build();
 
         comment = commentRepository.save(comment);
+
+        // Notification pour l'artiste
+        notificationService.createNotification(
+            artwork.getArtistId(),
+            user.getFirstName() + " a commenté votre œuvre : " + artwork.getTitle()
+        );
+
         return mapToCommentResponse(comment);
     }
 

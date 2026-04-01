@@ -48,6 +48,9 @@ public class Payment {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "tenant_id")
+    private String tenantId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -17,6 +17,7 @@ com\yowpainter\modules\notification\controller\NotificationController.class
 com\yowpainter\modules\event\entity\Event$EventBuilder.class
 com\yowpainter\modules\notification\entity\Notification$NotificationBuilder.class
 com\yowpainter\modules\auth\controller\BuyerController.class
+com\yowpainter\modules\admin\service\AdminService.class
 com\yowpainter\modules\notification\service\NotificationService.class
 com\yowpainter\modules\artwork\service\ArtworkService.class
 com\yowpainter\modules\shop\entity\OrderItem.class
@@ -29,6 +30,7 @@ com\yowpainter\modules\shop\dto\OrderCreateRequest.class
 com\yowpainter\modules\shop\controller\ShopController.class
 com\yowpainter\modules\shop\dto\OrderCreateRequest$OrderCreateRequestBuilder.class
 com\yowpainter\modules\event\dto\EventCreateRequest.class
+com\yowpainter\modules\event\scheduler\ReservationTimeoutScheduler.class
 com\yowpainter\shared\tenant\TenantContext.class
 com\yowpainter\modules\auth\entity\RefreshToken.class
 com\yowpainter\config\OpenApiConfig.class

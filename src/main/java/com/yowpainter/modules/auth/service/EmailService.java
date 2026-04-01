@@ -49,4 +49,44 @@ public class EmailService {
             log.info("LIEN DE SECOURS (DEBUG) : {}", resetLink);
         }
     }
+
+    public void sendPaymentConfirmation(String to, String reference, java.math.BigDecimal amount) {
+        String subject = "Confirmation de paiement - YowPainter";
+        String content = "<p>Bonjour,</p>"
+                + "<p>Merci pour votre achat sur YowPainter !</p>"
+                + "<p>Votre paiement de <strong>" + amount + " XAF</strong> pour la référence <strong>" + reference + "</strong> a été validé.</p>"
+                + "<p>Vous pouvez consulter vos achats dans votre espace personnel.</p>"
+                + "<p>L'équipe YowPainter</p>";
+
+        sendEmail(to, subject, content);
+    }
+
+    public void sendNewSaleNotification(String to, String reference, java.math.BigDecimal amount) {
+        String subject = "Nouvelle vente sur YowPainter ! 🎨";
+        String content = "<p>Félicitations !</p>"
+                + "<p>Vous venez d'effectuer une nouvelle vente sur votre boutique YowPainter.</p>"
+                + "<p>Référence : <strong>" + reference + "</strong><br/>"
+                + "Montant : <strong>" + amount + " XAF</strong></p>"
+                + "<p>Rendez-vous dans votre tableau de bord pour gérer la commande.</p>"
+                + "<p>L'équipe YowPainter</p>";
+
+        sendEmail(to, subject, content);
+    }
+
+    private void sendEmail(String to, String subject, String content) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+            log.info("E-mail '{}' envoyé à {}", subject, to);
+        } catch (MessagingException e) {
+            log.error("Erreur l'envoi de l'e-mail '{}' à {}", subject, to, e);
+        }
+    }
 }

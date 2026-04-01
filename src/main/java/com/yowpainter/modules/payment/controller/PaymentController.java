@@ -34,15 +34,9 @@ public class PaymentController {
         String externalReference = payload.get("external_reference");
 
         if ("SUCCESSFUL".equals(status)) {
-            // Dans un système multi-tenant, on peut avoir besoin du tenantId. 
-            // On peut le passer dans external_reference (ex: "tenantId:referenceId") 
-            // ou le stocker préalablement. Pour cet exemple, on suppose que le service 
-            // gère la résolution ou que le tenant est global.
-            
-            // Note: Pour YowPainter, on doit s'assurer que le TenantContext est correct si on utilise des schémas séparés.
-            // Si le externalReference contient le tenantId, on peut l'extraire.
-            
             paymentService.processSuccessfulPayment(reference, externalReference);
+        } else {
+            paymentService.processFailedPayment(reference, externalReference, status);
         }
 
         return ResponseEntity.ok("Received");

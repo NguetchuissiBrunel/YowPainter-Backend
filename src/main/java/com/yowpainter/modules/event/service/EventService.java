@@ -13,6 +13,7 @@ import com.yowpainter.modules.event.repository.TicketRepository;
 import com.yowpainter.modules.auth.entity.AppUser;
 import com.yowpainter.modules.auth.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -188,6 +190,26 @@ public class EventService {
         ticketRepository.save(ticket);
 
         return mapToTicketResponse(ticket);
+    }
+
+    @Transactional
+    public void cancelAbandonedReservationsForTenant(String tenantId) {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(30);
+        List<Reservation> abandoned = reservationRepository.findByStatusAndReservedAtBefore(ReservationStatus.PENDING, threshold);
+
+        for (Reservation res : abandoned) {
+            res.setStatus(ReservationStatus.CANCELLED);
+            reservationRepository.save(res);
+
+            Event event = res.getEvent();
+            event.setReservedCount(event.getReservedCount() - 1);
+            if (event.getStatus() == EventStatus.FULL) {
+                event.setStatus(EventStatus.PUBLISHED);
+            }
+            eventRepository.save(event);
+
+            log.info("[{}] Cancelled abandoned reservation: {} for event: {}", tenantId, res.getId(), event.getName());
+        }
     }
 
     public List<String> getLocations() {

@@ -18,6 +18,10 @@ import java.util.stream.Collectors;
 public class ArtistService {
 
     private final ArtistRepository artistRepository;
+    private final com.yowpainter.modules.artwork.repository.ArtworkRepository artworkRepository;
+    private final com.yowpainter.modules.artwork.repository.ArtworkLikeRepository artworkLikeRepository;
+    private final com.yowpainter.modules.shop.repository.OrderRepository orderRepository;
+    private final com.yowpainter.modules.event.repository.EventRepository eventRepository;
 
     public ArtistResponse getArtistBySlug(String slug) {
         Artist artist = artistRepository.findBySlug(slug)
@@ -63,15 +67,26 @@ public class ArtistService {
     }
 
     public ArtistAnalyticsResponse getArtistAnalytics(String email) {
-        // Mock analytics for now
-        // In a real app, this would query artwork_like, order, and event tables
+        long totalArtworks = artworkRepository.count();
+        long publishedArtworks = artworkRepository.countByStatus(com.yowpainter.modules.artwork.entity.ArtworkStatus.PUBLISHED);
+        long totalLikes = artworkLikeRepository.count();
+        long totalSales = orderRepository.countByStatus(com.yowpainter.modules.shop.entity.OrderStatus.PAID);
+        
+        java.math.BigDecimal revenue = orderRepository.sumTotalAmountByStatus(com.yowpainter.modules.shop.entity.OrderStatus.PAID);
+        double totalRevenue = revenue != null ? revenue.doubleValue() : 0.0;
+        
+        long upcomingEvents = eventRepository.countByStatusAndStartDateTimeAfter(
+                com.yowpainter.modules.event.entity.EventStatus.PUBLISHED, 
+                java.time.LocalDateTime.now()
+        );
+
         return ArtistAnalyticsResponse.builder()
-                .totalArtworks(12)
-                .publishedArtworks(8)
-                .totalLikes(156)
-                .totalSales(5)
-                .totalRevenue(1250.0)
-                .upcomingEvents(2)
+                .totalArtworks(totalArtworks)
+                .publishedArtworks(publishedArtworks)
+                .totalLikes(totalLikes)
+                .totalSales(totalSales)
+                .totalRevenue(totalRevenue)
+                .upcomingEvents(upcomingEvents)
                 .build();
     }
 

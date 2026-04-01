@@ -34,4 +34,6 @@ public interface ArtworkRepository extends JpaRepository<Artwork, UUID> {
 
     @Query(value = "SELECT DISTINCT jsonb_array_elements_text(tags) FROM artwork WHERE tags IS NOT NULL", nativeQuery = true)
     List<String> findDistinctTags();
+
+    long countByStatus(ArtworkStatus status);
 }

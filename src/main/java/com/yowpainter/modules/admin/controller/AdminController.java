@@ -20,51 +20,53 @@ import java.util.UUID;
 @Tag(name = "Administration", description = "Controles globaux de la plateforme (Restreint aux Admins)")
 public class AdminController {
 
+    private final com.yowpainter.modules.admin.service.AdminService adminService;
+
     @GetMapping("/tenants")
     @Operation(summary = "Lister tous les artistes / tenants enregistres")
     public ResponseEntity<List<Map<String, Object>>> getAllTenants() {
-        return ResponseEntity.ok(List.of(
-            Map.of("id", UUID.randomUUID(), "name", "Artiste 1", "slug", "artiste1", "status", "ACTIVE"),
-            Map.of("id", UUID.randomUUID(), "name", "Artiste 2", "slug", "artiste2", "status", "SUSPENDED")
-        ));
+        return ResponseEntity.ok(adminService.getAllTenants());
     }
 
     @PatchMapping("/tenants/{id}/status")
     @Operation(summary = "Activer ou suspendre un tenant")
     public ResponseEntity<Void> updateTenantStatus(@PathVariable UUID id, @RequestParam String status) {
-        return ResponseEntity.ok().build();
+        try {
+            adminService.updateTenantStatus(id, status);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/users")
     @Operation(summary = "Lister tous les utilisateurs de la plateforme")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
-        return ResponseEntity.ok(List.of(
-            Map.of("email", "admin@yowpainter.com", "role", "ROLE_ADMIN"),
-            Map.of("email", "buyer@gmail.com", "role", "ROLE_BUYER")
-        ));
+        return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @DeleteMapping("/users/{id}")
     @Operation(summary = "Supprimer definitivement un utilisateur")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        return ResponseEntity.ok().build();
+        try {
+            adminService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/stats")
     @Operation(summary = "Statistiques globales de la plateforme")
     public ResponseEntity<Map<String, Object>> getGlobalStats() {
-        return ResponseEntity.ok(Map.of(
-            "total_tenants", 150,
-            "total_users", 3500,
-            "total_sales_volume", 45000.0,
-            "active_subscriptions", 120
-        ));
+        return ResponseEntity.ok(adminService.getGlobalStats());
     }
 
     @GetMapping("/logs")
     @Operation(summary = "Consulter les logs d'audit (Mock)")
     public ResponseEntity<List<String>> getAuditLogs() {
-        return ResponseEntity.ok(List.of("User X logged in", "Tenant Y created artwork Z"));
+        // En attente d'implémentation de la table AuditLog
+        return ResponseEntity.ok(List.of("Fonctionnalité en cours de développement"));
     }
 
     @GetMapping("/me")

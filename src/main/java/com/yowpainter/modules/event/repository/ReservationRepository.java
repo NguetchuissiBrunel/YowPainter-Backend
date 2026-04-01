@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
     List<Reservation> findByEventId(UUID eventId);
     List<Reservation> findByUserId(UUID userId);
+    
+    List<Reservation> findByStatusAndReservedAtBefore(com.yowpainter.modules.event.entity.ReservationStatus status, java.time.LocalDateTime threshold);
 }
