@@ -50,13 +50,13 @@ com\yowpainter\modules\event\repository\TicketRepository.class
 com\yowpainter\modules\auth\entity\RefreshToken$RefreshTokenBuilder.class
 com\yowpainter\modules\shop\dto\ProductResponse.class
 com\yowpainter\modules\auth\controller\AuthController.class
-com\yowpainter\modules\payment\config\StripeConfig.class
 com\yowpainter\modules\event\dto\TicketResponse$TicketResponseBuilder.class
 com\yowpainter\modules\auth\dto\AdminRegisterRequest$AdminRegisterRequestBuilder.class
 com\yowpainter\modules\artwork\entity\ArtworkStyle.class
 com\yowpainter\modules\shop\dto\OrderResponse$OrderResponseBuilder.class
 com\yowpainter\modules\event\dto\TicketResponse.class
 com\yowpainter\modules\shop\entity\PaymentStatus.class
+com\yowpainter\modules\auth\dto\ForgotPasswordRequest.class
 com\yowpainter\modules\event\service\EventService.class
 com\yowpainter\YowPainterApplication.class
 com\yowpainter\modules\shop\entity\OrderStatus.class
@@ -64,6 +64,7 @@ com\yowpainter\modules\artwork\entity\Artwork$ArtworkBuilder.class
 com\yowpainter\modules\shop\dto\ProductCreateRequest$ProductCreateRequestBuilder.class
 com\yowpainter\modules\shop\entity\OrderItem$OrderItemBuilder.class
 com\yowpainter\modules\auth\dto\LoginRequest.class
+com\yowpainter\modules\auth\dto\ResetPasswordRequest.class
 com\yowpainter\modules\shop\repository\PaymentRepository.class
 com\yowpainter\modules\auth\repository\RefreshTokenRepository.class
 com\yowpainter\modules\subscription\entity\SubscriptionPlan.class
@@ -77,6 +78,7 @@ com\yowpainter\modules\auth\dto\BuyerProfileResponse$BuyerProfileResponseBuilder
 com\yowpainter\modules\event\dto\ReservationResponse.class
 com\yowpainter\modules\notification\entity\Notification.class
 com\yowpainter\modules\shop\entity\Payment$PaymentBuilder.class
+com\yowpainter\modules\payment\client\CampayClient$CollectRequest$CollectRequestBuilder.class
 com\yowpainter\modules\artwork\dto\CommentRequest.class
 com\yowpainter\shared\security\UserDetailsServiceImpl.class
 com\yowpainter\shared\security\JwtService.class
@@ -87,7 +89,10 @@ com\yowpainter\modules\artist\dto\ArtistUpdateRequest.class
 com\yowpainter\modules\shop\dto\OrderItemResponse.class
 com\yowpainter\modules\artist\entity\Artist$ArtistBuilderImpl.class
 com\yowpainter\modules\shop\entity\Product$ProductBuilder.class
+com\yowpainter\modules\payment\client\CampayClient$CollectResponse.class
+com\yowpainter\modules\payment\client\CampayClient.class
 com\yowpainter\modules\search\dto\GlobalSearchResponse$GlobalSearchResponseBuilder.class
+com\yowpainter\modules\payment\config\CampayConfig.class
 com\yowpainter\modules\payment\service\PaymentService.class
 com\yowpainter\modules\artwork\dto\ArtworkCreateRequest.class
 com\yowpainter\modules\auth\service\RefreshTokenService.class
@@ -100,6 +105,7 @@ com\yowpainter\modules\search\dto\GlobalSearchResponse.class
 com\yowpainter\modules\shop\dto\OrderItemResponse$OrderItemResponseBuilder.class
 com\yowpainter\modules\auth\dto\RegisterRequest$RegisterRequestBuilder.class
 com\yowpainter\modules\event\repository\ReservationRepository.class
+com\yowpainter\modules\payment\client\CampayClient$TransactionStatusResponse.class
 com\yowpainter\modules\shop\entity\Order.class
 com\yowpainter\shared\tenant\SchemaMultiTenantConnectionProvider.class
 com\yowpainter\modules\artwork\repository\ArtworkRepository.class
@@ -110,6 +116,7 @@ com\yowpainter\modules\auth\entity\AppUser$AppUserBuilder.class
 com\yowpainter\modules\event\entity\Ticket$TicketBuilder.class
 com\yowpainter\modules\artist\entity\Artist.class
 com\yowpainter\modules\artwork\repository\ArtworkCommentRepository.class
+com\yowpainter\modules\auth\service\EmailService.class
 com\yowpainter\modules\artist\dto\ArtistAnalyticsResponse.class
 com\yowpainter\modules\event\dto\EventResponse.class
 com\yowpainter\modules\artist\controller\ArtistController.class
@@ -133,6 +140,7 @@ com\yowpainter\modules\admin\controller\AdminController.class
 com\yowpainter\modules\notification\repository\NotificationRepository.class
 com\yowpainter\modules\artwork\entity\ArtworkLike.class
 com\yowpainter\modules\event\entity\EventType.class
+com\yowpainter\modules\payment\client\CampayClient$CollectRequest.class
 com\yowpainter\modules\shop\repository\ProductRepository.class
 com\yowpainter\modules\event\dto\EventResponse$EventResponseBuilder.class
 com\yowpainter\modules\auth\entity\UserRole.class

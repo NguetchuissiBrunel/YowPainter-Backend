@@ -32,10 +32,18 @@ spring:
     locations: classpath:db/migration/public
     baseline-on-migrate: true
 
-  # Stripe API Keys (a injecter en env variables)
-  stripe:
-    api-key: ${STRIPE_API_KEY:sk_test_mock_key}
-    webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_mock_key}
+  # Configuration de l'envoi d'emails (Spring Boot 4)
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 # JWT Configuration
 jwt:
@@ -43,6 +51,18 @@ jwt:
   secret: ${JWT_SECRET:YowPainterSuperSecretKey1234567890ThisIsLongEnough}
   expiration: 900000 # 15 minutes en ms
   refresh-expiration: 604800000 # 7 jours en ms
+
+# Custom App Properties
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  payment:
+    campay:
+      app-username: ${CAMPAY_USERNAME}
+      app-password: ${CAMPAY_PASSWORD}
+      base-url: ${CAMPAY_BASE_URL:https://demo.campay.net/api}
+      token-url: /token/
+      collect-url: /collect/
+      transaction-url: /transaction/
 
 springdoc:
   api-docs:

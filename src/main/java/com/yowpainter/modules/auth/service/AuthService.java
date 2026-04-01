@@ -1,5 +1,6 @@
 package com.yowpainter.modules.auth.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,9 +33,38 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final TenantProvisioningService tenantProvisioningService;
     private final RefreshTokenService refreshTokenService;
+    private final EmailService emailService;
 
     public List<String> getAvailableRoles() {
         return List.of(UserRole.ROLE_ARTIST.name(), UserRole.ROLE_BUYER.name());
+    }
+
+    @Transactional
+    public void processForgotPassword(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec cet e-mail"));
+
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        var user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Jeton de réinitialisation invalide"));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Le jeton de réinitialisation a expiré");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
     }
 
     @Transactional

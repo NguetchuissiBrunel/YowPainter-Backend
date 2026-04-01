@@ -99,9 +99,10 @@ public class EventController {
 
     @PostMapping("/events/reservations/{id}/checkout")
     @PreAuthorize("hasAnyRole('BUYER', 'ARTIST')")
-    @Operation(summary = "Initier le paiement Stripe pour une reservation")
+    @Operation(summary = "Initier le paiement Mobile Money (MOMO/Orange) pour une réservation")
     public ResponseEntity<Map<String, String>> checkoutReservation(
             @PathVariable UUID id,
+            @RequestParam String phoneNumber,
             @AuthenticationPrincipal UserDetails userDetails) {
         
         ReservationResponse reservation = eventService.getReservationById(id);
@@ -113,15 +114,16 @@ public class EventController {
         
         String tenantId = tenantResolver.resolveCurrentTenantIdentifier();
         
-        String checkoutUrl = paymentService.createCheckoutSession(
+        String paymentReference = paymentService.initiateMobileMoneyPayment(
                 id, 
                 "RESERVATION", 
                 event.getTicketPrice(), 
                 tenantId, 
-                userDetails.getUsername()
+                userDetails.getUsername(),
+                phoneNumber
         );
         
-        return ResponseEntity.ok(Map.of("checkoutUrl", checkoutUrl));
+        return ResponseEntity.ok(Map.of("paymentReference", paymentReference));
     }
 
     @GetMapping("/events/{id}/reservations")

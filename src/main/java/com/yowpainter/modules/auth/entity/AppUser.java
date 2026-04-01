@@ -47,6 +47,9 @@ public class AppUser implements UserDetails {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    private String resetToken;
+    private LocalDateTime resetTokenExpiry;
+
     // ----- UserDetails Methods -----
 
     @Override

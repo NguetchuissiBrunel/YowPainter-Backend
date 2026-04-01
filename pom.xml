@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>4.0.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.yowpainter</groupId>
@@ -16,9 +16,9 @@
 
     <properties>
         <java.version>17</java.version>
-        <jjwt.version>0.12.5</jjwt.version>
-        <flyway.version>10.10.0</flyway.version>
-        <springdoc.version>2.5.0</springdoc.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        <flyway.version>11.0.0</flyway.version>
+        <springdoc.version>3.0.0</springdoc.version>
     </properties>
 
     <dependencies>
@@ -73,18 +73,11 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Swagger OpenAPI -->
+        <!-- Swagger OpenAPI (SpringDoc 3 for Spring Boot 4) -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
-        </dependency>
-
-        <!-- Stripe API -->
-        <dependency>
-            <groupId>com.stripe</groupId>
-            <artifactId>stripe-java</artifactId>
-            <version>24.23.0</version>
         </dependency>
 
         <!-- Tests -->
@@ -103,12 +96,16 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
+        </dependency>
+
+        <!-- Spring Boot Mail -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!-- H2 for Testing -->
@@ -118,6 +115,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>

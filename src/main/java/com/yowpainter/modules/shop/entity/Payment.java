@@ -36,14 +36,17 @@ public class Payment {
 
     @Column(nullable = false)
     @Builder.Default
-    private String currency = "EUR";
+    private String currency = "XAF";
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
 
-    @Column(name = "stripe_payment_intent_id")
-    private String stripePaymentIntentId;
+    @Column(name = "provider_reference")
+    private String providerReference;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

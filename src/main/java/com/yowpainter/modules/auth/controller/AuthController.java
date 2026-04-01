@@ -72,5 +72,36 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Demander la réinitialisation du mot de passe")
+    public ResponseEntity<AuthResponse> forgotPassword(@Valid @RequestBody com.yowpainter.modules.auth.dto.ForgotPasswordRequest request) {
+        try {
+            authService.processForgotPassword(request.getEmail());
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .message("Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé.")
+                    .build());
+        } catch (IllegalArgumentException e) {
+            // Pour la sécurité, on retourne la même réponse même si l'e-mail n'existe pas
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .message("Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé.")
+                    .build());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Réinitialiser le mot de passe avec le jeton")
+    public ResponseEntity<AuthResponse> resetPassword(@Valid @RequestBody com.yowpainter.modules.auth.dto.ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .message("Votre mot de passe a été réinitialisé avec succès.")
+                    .build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(AuthResponse.builder()
+                    .message(e.getMessage())
+                    .build());
+        }
+    }
+
 
 }

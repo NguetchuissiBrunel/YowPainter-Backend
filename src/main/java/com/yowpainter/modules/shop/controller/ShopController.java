@@ -63,23 +63,25 @@ public class ShopController {
 
     @PostMapping("/orders/{id}/checkout")
     @PreAuthorize("hasRole('BUYER')")
-    @Operation(summary = "Initier le paiement Stripe pour une commande")
+    @Operation(summary = "Initier le paiement Mobile Money (MOMO/Orange) pour une commande")
     public ResponseEntity<Map<String, String>> checkoutOrder(
             @PathVariable UUID id,
+            @RequestParam String phoneNumber,
             @AuthenticationPrincipal UserDetails userDetails) {
         
         OrderResponse order = shopService.getOrderById(id);
         String tenantId = tenantResolver.resolveCurrentTenantIdentifier();
         
-        String checkoutUrl = paymentService.createCheckoutSession(
+        String paymentReference = paymentService.initiateMobileMoneyPayment(
                 id, 
                 "ORDER", 
                 order.getTotalAmount(), 
                 tenantId, 
-                userDetails.getUsername()
+                userDetails.getUsername(),
+                phoneNumber
         );
         
-        return ResponseEntity.ok(Map.of("checkoutUrl", checkoutUrl));
+        return ResponseEntity.ok(Map.of("paymentReference", paymentReference));
     }
 
     @GetMapping("/orders/{id}")
