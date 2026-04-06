@@ -42,7 +42,26 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**", "/api/auth/forgot-password", "/api/auth/reset-password", "/api/public/**", "/api/v1/public/**", "/api/shop/v1/public/**", "/api/admin/auth/**", "/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers(
+                        "/api/auth/**",
+                        "/api/auth/forgot-password",
+                        "/api/auth/reset-password",
+                        "/api/public/**",
+                        "/api/v1/public/**",
+                        "/api/shop/v1/public/**",
+                        "/api/admin/auth/**",
+                        "/api-docs/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/webjars/**",
+                        "/error"
+                ).permitAll()
                 .requestMatchers("/api/payment/callback").permitAll()
                 .anyRequest().authenticated()
             )
