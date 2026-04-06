@@ -1,5 +1,6 @@
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\config\OpenApiConfig.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\config\SecurityConfig.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\config\WebSocketConfig.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\admin\controller\AdminAuthController.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\admin\controller\AdminController.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\admin\service\AdminService.java
@@ -44,6 +45,15 @@ C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\auth\service\AuthService.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\auth\service\EmailService.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\auth\service\RefreshTokenService.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\controller\ChatController.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\dto\ChatMessageDto.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\entity\ChatMessage.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\entity\ChatMessageStatus.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\entity\ChatRoom.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\repository\ChatMessageRepository.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\repository\ChatRoomRepository.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\service\ChatMessageService.java
+C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\chat\service\ChatRoomService.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\event\controller\EventController.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\event\dto\EventCreateRequest.java
 C:\Users\Nguetchuissi brunel\Desktop\reseau\yowpainter-backend\src\main\java\com\yowpainter\modules\event\dto\EventResponse.java
