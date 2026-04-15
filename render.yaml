@@ -10,33 +10,15 @@ services:
   # Service Web Backend (Docker)
   - type: web
     name: yowpainter-api
-    runtime: docker # Utilisation de Docker car Java n'est pas supporté nativement
+    runtime: docker
     plan: free
     region: frankfurt 
     envVars:
-      # Note: Le buildCommand et startCommand sont définis dans le Dockerfile
-      
-      # Configuration de la base de données (Propriétés individuelles)
-      - key: DB_HOST
+      # URL de base de données complète (interne)
+      - key: DATABASE_URL
         fromDatabase:
           name: yowpainter-db
-          property: internalHost
-      - key: DB_PORT
-        fromDatabase:
-          name: yowpainter-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: yowpainter-db
-          property: database
-      - key: DB_USER
-        fromDatabase:
-          name: yowpainter-db
-          property: user
-      - key: DB_PASS
-        fromDatabase:
-          name: yowpainter-db
-          property: password
+          property: connectionString
 
       # Sécurité et Application
       - key: JWT_SECRET

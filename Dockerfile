@@ -14,12 +14,16 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Installation de sed (déjà présent dans alpine mais pour la forme)
+RUN apk add --no-cache sed
+
 # Copier le JAR généré depuis l'étape de build
 COPY --from=build /app/target/*.jar app.jar
 
 # Optimisation pour environnements Cloud (Render Free Tier : 512MB RAM)
-# On limite la heap à 384MB pour laisser de la place au système
 ENV JAVA_OPTS="-Xmx384m -Xms384m"
 
-# Commande de lancement (sh -c permet l'expansion des variables d'env comme PORT)
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
+# Commande de lancement :
+# 1. On convertit postgres:// en jdbc:postgresql:// pour Spring Boot
+# 2. On lance l'application avec le port injecté par Render
+ENTRYPOINT ["sh", "-c", "export SPRING_DATASOURCE_URL=$(echo $DATABASE_URL | sed 's/postgres:/jdbc:postgresql:/') && java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
