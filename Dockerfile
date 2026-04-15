@@ -14,16 +14,18 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Installation de sed (déjà présent dans alpine mais pour la forme)
-RUN apk add --no-cache sed
+# Installation de sed et bash pour le script d'entrée
+RUN apk add --no-cache sed bash
 
 # Copier le JAR généré depuis l'étape de build
 COPY --from=build /app/target/*.jar app.jar
 
-# Optimisation pour environnements Cloud (Render Free Tier : 512MB RAM)
-ENV JAVA_OPTS="-Xmx384m -Xms384m"
+# Copier le script d'entrée
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
-# Commande de lancement :
-# 1. On convertit dynamiquement le protocole (postgres: ou postgresql:) en jdbc:postgresql:
-# 2. On passe l'URL en argument --spring.datasource.url pour qu'elle soit prioritaire
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080} --spring.datasource.url=$(echo $DATABASE_URL | sed 's|^[^:]*|jdbc:postgresql|')"]
+# Port par défaut (Render injectera PORT)
+EXPOSE 8080
+
+# Utilisation du script comme point d'entrée
+ENTRYPOINT ["./entrypoint.sh"]
