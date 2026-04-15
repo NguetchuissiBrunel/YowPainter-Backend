@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # Changé de validate à update pour créer les tables manquantes
+      ddl-auto: validate # Utilise Flyway maintenant
     show-sql: true
     properties:
       hibernate:
@@ -37,7 +37,7 @@ spring:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:nguetchuissibrunel@gmail.com}
-    password: ${MAIL_PASSWORD:ztzj stec kxoh whlm}
+    password: ${MAIL_PASSWORD:ztzjsteckxohwhlm}
     properties:
       mail:
         smtp:
