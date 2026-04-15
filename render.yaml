@@ -1,0 +1,45 @@
+services:
+  # Base de données PostgreSQL
+  - type: database
+    name: yowpainter-db
+    databaseName: yowpainter_prod
+    user: yowpainter_user
+    plan: free # Utilise l'offre gratuite (expire après 90 jours sur Render, puis renouvelable)
+
+  # Service Web Backend (Spring Boot)
+  - type: web
+    name: yowpainter-api
+    env: java
+    plan: free
+    region: frankfurt # Plus proche pour l'Afrique/Europe
+    buildCommand: mvn clean install -DskipTests
+    startCommand: java -jar target/yowpainter-backend-1.0.0-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      
+      # Connexion à la base de données (Utilise les propriétés injectées automatiquement par Render)
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: yowpainter-db
+          property: jdbcConnectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: yowpainter-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: yowpainter-db
+          property: password
+
+      # Sécurité et Application
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://yowpainter.onrender.com # À mettre à jour avec votre vraie URL frontend
+
+      # Mail (À configurer manuellement dans le dashboard Render plus tard pour plus de sécurité)
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
