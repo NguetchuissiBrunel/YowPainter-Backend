@@ -2,42 +2,48 @@
 databases:
   - name: yowpainter-db
     databaseName: yowpainter_prod
-    plan: free # Note: L'offre gratuite expire après 90 jours
+    plan: free
     user: yowpainter_user
 
 services:
-  # Service Web Backend (Spring Boot)
+  # Service Web Backend (Docker)
   - type: web
     name: yowpainter-api
-    env: java
+    runtime: docker # Utilisation de Docker car Java n'est pas supporté nativement
     plan: free
     region: frankfurt 
-    buildCommand: mvn clean install -DskipTests
-    startCommand: java -jar target/yowpainter-backend-1.0.0-SNAPSHOT.jar
     envVars:
-      - key: JAVA_VERSION
-        value: 17
+      # Note: Le buildCommand et startCommand sont définis dans le Dockerfile
       
-      # Connexion à la base de données
-      - key: SPRING_DATASOURCE_URL
+      # Configuration de la base de données (Propriétés individuelles)
+      - key: DB_HOST
         fromDatabase:
           name: yowpainter-db
-          property: jdbcConnectionString
-      - key: SPRING_DATASOURCE_USERNAME
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: yowpainter-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: yowpainter-db
+          property: database
+      - key: DB_USER
         fromDatabase:
           name: yowpainter-db
           property: user
-      - key: SPRING_DATASOURCE_PASSWORD
+      - key: DB_PASS
         fromDatabase:
           name: yowpainter-db
           property: password
 
+      # Sécurité et Application
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
         value: https://yowpainter.onrender.com
 
-      # Mail secrets (à remplir manuellement sur Render pour plus de sécurité)
+      # Mail secrets
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD

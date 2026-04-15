@@ -8,9 +8,9 @@ spring:
     name: yowpainter-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/EventSaas}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:landry1928}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:EventSaas}}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:landry1928}
     driver-class-name: org.postgresql.Driver
     # Propriete importante pour que Hibernate recupere correctement le metadata multi-schema
     hikari:
