@@ -24,13 +24,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    enabled: true
-    schemas: public
-    locations: classpath:db/migration/public
-    baseline-on-migrate: true
+    enabled: false
 
   # Configuration de l'envoi d'emails (Spring Boot 4)
   mail:
