@@ -19,25 +19,21 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # Utilise Flyway maintenant
+      ddl-auto: update # Changé pour forcer la création des tables manquantes
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    enabled: true
-    schemas: public
-    locations: classpath:db/migration/public
-    baseline-on-migrate: true
+    enabled: false
 
   # Configuration de l'envoi d'emails (Spring Boot 4)
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:nguetchuissibrunel@gmail.com}
-    password: ${MAIL_PASSWORD:ztzj stec kxoh whlm}
+    password: ${MAIL_PASSWORD:ztzjsteckxohwhlm}
     properties:
       mail:
         smtp:

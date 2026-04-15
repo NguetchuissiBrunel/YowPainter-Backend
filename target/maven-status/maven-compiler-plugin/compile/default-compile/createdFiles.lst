@@ -1,3 +1,4 @@
+com\yowpainter\config\JacksonConfig.class
 com\yowpainter\modules\chat\dto\ChatMessageDto.class
 com\yowpainter\modules\chat\entity\ChatMessage$ChatMessageBuilder.class
 com\yowpainter\modules\search\controller\SearchController.class
