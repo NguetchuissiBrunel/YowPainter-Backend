@@ -35,7 +35,6 @@ public class PaymentService {
     private final com.yowpainter.modules.notification.service.NotificationService notificationService;
     private final com.yowpainter.modules.artist.repository.ArtistRepository artistRepository;
     private final com.yowpainter.modules.auth.service.EmailService emailService;
-    private final com.yowpainter.shared.tenant.TenantContext tenantContext; // Still use static usually, but injecting for visibility or just using static
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;

@@ -23,3 +23,10 @@ jwt:
   secret: YowPainterTestSecretKeyForIsolationTestingPurposesOnly1234567890
   expiration: 3600000
   refresh-expiration: 86400000
+
+app:
+  payment:
+    campay:
+      app-username: test-user
+      app-password: test-password
+      base-url: https://demo.campay.net/api
