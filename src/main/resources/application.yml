@@ -8,9 +8,9 @@ spring:
     name: yowpainter-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:EventSaas}}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASS:landry1928}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:dpg-d7fnn2t7vvec73aedqjg-a}:${DB_PORT:5432}/${DB_NAME:yowpainter_prod}}
+    username: ${DB_USER:yowpainter_user}
+    password: ${DB_PASS:VOb7POs8uaT1gC3Iau9WNkHBt3GD1Mi5}
     driver-class-name: org.postgresql.Driver
     # Propriete importante pour que Hibernate recupere correctement le metadata multi-schema
     hikari:
@@ -36,8 +36,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:nguetchuissibrunel@gmail.com}
+    password: ${MAIL_PASSWORD:ztzj stec kxoh whlm}
     properties:
       mail:
         smtp:
@@ -57,8 +57,8 @@ app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   payment:
     campay:
-      app-username: ${CAMPAY_USERNAME}
-      app-password: ${CAMPAY_PASSWORD}
+      app-username: ${CAMPAY_USERNAME:Key6ZTdXKKxL7Ztlxr-PCH_IrgX15kgZU8ePwmE7QkYQa1uXxcPLxiAQ90Tf2pShnpRmNohOiapkZYDV-Ai0YQ}
+      app-password: ${CAMPAY_PASSWORD:tsElc7CIo0G8d7-ducw6zyu1PzHg3cf1bp2dLLAiKsGatlwtr-AjXV5zTyogiilxtp-UoFj00naLJbLTG3EjWg}
       base-url: ${CAMPAY_BASE_URL:https://demo.campay.net/api}
       token-url: /token/
       collect-url: /collect/

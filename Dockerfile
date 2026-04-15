@@ -14,18 +14,11 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Installation de sed et bash pour le script d'entrée
-RUN apk add --no-cache sed bash
-
 # Copier le JAR généré depuis l'étape de build
 COPY --from=build /app/target/*.jar app.jar
 
-# Copier le script d'entrée
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
-
-# Port par défaut (Render injectera PORT)
+# Port par défaut
 EXPOSE 8080
 
-# Utilisation du script comme point d'entrée
-ENTRYPOINT ["./entrypoint.sh"]
+# Lancement de l'application directement
+ENTRYPOINT ["java", "-Xmx384m", "-Xms384m", "-jar", "app.jar"]
