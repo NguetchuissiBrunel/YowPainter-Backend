@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # Utilise Flyway maintenant
+      ddl-auto: update # Changé de validate à update pour créer les tables manquantes
     show-sql: true
     properties:
       hibernate:
