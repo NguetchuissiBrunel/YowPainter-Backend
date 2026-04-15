@@ -4,6 +4,7 @@ databases:
     databaseName: yowpainter_prod
     plan: free
     user: yowpainter_user
+    region: frankfurt
 
 services:
   # Service Web Backend (Docker)
@@ -19,7 +20,7 @@ services:
       - key: DB_HOST
         fromDatabase:
           name: yowpainter-db
-          property: host
+          property: internalHost
       - key: DB_PORT
         fromDatabase:
           name: yowpainter-db
