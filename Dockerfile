@@ -24,6 +24,6 @@ COPY --from=build /app/target/*.jar app.jar
 ENV JAVA_OPTS="-Xmx384m -Xms384m"
 
 # Commande de lancement :
-# 1. On convertit postgres:// en jdbc:postgresql:// pour Spring Boot
-# 2. On lance l'application avec le port injecté par Render
-ENTRYPOINT ["sh", "-c", "export SPRING_DATASOURCE_URL=$(echo $DATABASE_URL | sed 's/postgres:/jdbc:postgresql:/') && java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
+# 1. On convertit dynamiquement le protocole (postgres: ou postgresql:) en jdbc:postgresql:
+# 2. On passe l'URL en argument --spring.datasource.url pour qu'elle soit prioritaire
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080} --spring.datasource.url=$(echo $DATABASE_URL | sed 's|^[^:]*|jdbc:postgresql|')"]
