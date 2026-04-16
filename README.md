@@ -38,6 +38,14 @@ Le projet a été récemment modernisé vers les standards les plus récents :
 *   **Alertes** : Système de notification interne pour les nouvelles commandes ou réservations.
 *   **Abonnements** : Gestion des abonnés aux profils d'artistes.
 
+### 💬 Messagerie en Temps Réel (WebSockets)
+L'application utilise le protocole STOMP sur WebSockets pour le chat instantané.
+*   **Endpoint de connexion** : `/ws` (Support SockJS activé).
+*   **Authentification** : Envoyer le token JWT dans le header `Authorization: Bearer <token>` lors de la connexion STOMP.
+*   **Destination d'envoi** : `/app/chat`
+*   **Abonnement réception** : `/user/queue/messages` (pour les messages privés).
+*   **Payload (JSON)** : Contient `senderId`, `recipientId`, `content` et `timestamp`.
+
 ## ⚙️ Configuration & Installation
 
 ### Prérequis
