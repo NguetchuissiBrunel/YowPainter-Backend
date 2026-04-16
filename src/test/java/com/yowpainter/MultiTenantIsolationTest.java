@@ -42,14 +42,7 @@ public class MultiTenantIsolationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @org.springframework.boot.test.context.TestConfiguration
-    static class TestConfig {
-        @org.springframework.context.annotation.Bean
-        public ObjectMapper objectMapper() {
-            return new ObjectMapper()
-                .findAndRegisterModules(); // Supporte Java 8 dates, etc.
-        }
-    }
+
 
     private static String tokenArtistA;
     private static String slugArtistA;

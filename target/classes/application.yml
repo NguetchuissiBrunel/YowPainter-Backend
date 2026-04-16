@@ -19,14 +19,17 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # Changé pour forcer la création des tables manquantes
+      ddl-auto: validate # Sécurisé pour la production
     show-sql: true
     properties:
       hibernate:
         format_sql: true
 
   flyway:
-    enabled: false
+    enabled: true
+    schemas: public
+    locations: classpath:db/migration/public
+    baseline-on-migrate: true
 
   # Configuration de l'envoi d'emails (Spring Boot 4)
   mail:

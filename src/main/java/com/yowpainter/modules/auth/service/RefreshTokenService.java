@@ -25,7 +25,11 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
+    @Transactional
     public RefreshToken createRefreshToken(UUID userId) {
+        deleteByUserId(userId); // Supprimer l'ancien token pour éviter la violation de contrainte unique
+        refreshTokenRepository.flush(); // Force l'exécution du DELETE avant l'INSERT
+        
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(userRepository.findById(userId).get())
                 .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))

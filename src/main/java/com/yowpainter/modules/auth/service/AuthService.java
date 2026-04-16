@@ -83,15 +83,19 @@ public class AuthService {
         
         AppUser savedUser = userRepository.save(admin);
 
+        var jwtToken = jwtService.generateToken(savedUser, "public");
+        var refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
+
         return AuthResponse.builder()
-                .accessToken(null)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken.getToken())
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
                 .profilePictureUrl(savedUser.getProfilePictureUrl())
                 .role(savedUser.getRole().name())
                 .tenantId("public")
-                .message("Inscription réussie. Veuillez vous connecter.")
+                .message("Inscription réussie.")
                 .build();
     }
 
@@ -161,8 +165,12 @@ public class AuthService {
         // Pour un visiteur/acheteur, tenant = "public". Pour un artiste, tenant = son slug
         String tenantId = savedUser.getRole() == UserRole.ROLE_ARTIST ? ((Artist) savedUser).getSlug() : "public";
 
+        var jwtToken = jwtService.generateToken(savedUser, tenantId);
+        var refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
+
         return AuthResponse.builder()
-                .accessToken(null)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken.getToken())
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
@@ -170,7 +178,7 @@ public class AuthService {
                 .role(savedUser.getRole().name())
                 .tenantId(tenantId)
                 .artistName(savedUser instanceof Artist ? ((Artist) savedUser).getArtistName() : null)
-                .message("Inscription réussie. Veuillez vous connecter.")
+                .message("Inscription réussie.")
                 .build();
     }
 
