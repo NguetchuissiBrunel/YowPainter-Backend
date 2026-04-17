@@ -68,6 +68,13 @@ public class ArtworkController {
         return ResponseEntity.ok(artworkService.getMyArtworks(userDetails.getUsername()));
     }
 
+    @GetMapping("/public/artworks/latest")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Recuperer les oeuvres récentes (tous artistes confondus)")
+    public ResponseEntity<List<ArtworkResponse>> getLatestArtworks() {
+        return ResponseEntity.ok(artworkService.getPublicArtworks());
+    }
+
     @GetMapping("/public/artworks/featured")
     @PreAuthorize("permitAll()")
     @Operation(summary = "Recuperer les oeuvres mises en avant")
