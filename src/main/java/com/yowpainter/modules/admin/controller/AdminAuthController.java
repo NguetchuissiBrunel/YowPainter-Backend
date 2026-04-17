@@ -31,6 +31,17 @@ public class AdminAuthController {
     @PostMapping("/register")
     @Operation(summary = "Inscription d'un nouvel Administrateur (Restreint)")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody AdminRegisterRequest request) {
-        return ResponseEntity.ok(authService.registerAdmin(request));
+        try {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(authService.registerAdmin(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(AuthResponse.builder()
+                    .message(e.getMessage())
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(AuthResponse.builder()
+                    .message("Erreur interne: " + e.getMessage() + (e.getCause() != null ? " - Cause: " + e.getCause().getMessage() : ""))
+                    .build());
+        }
     }
 }
