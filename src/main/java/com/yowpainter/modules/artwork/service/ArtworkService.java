@@ -61,8 +61,22 @@ public class ArtworkService {
                 .collect(Collectors.toList());
     }
 
+    public List<ArtworkResponse> getPublicArtworksByArtistSlug(String slug) {
+        Artist artist = artistRepository.findBySlug(slug).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return artworkRepository.findPublicArtworksByArtistId(artist.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public List<ArtworkResponse> getArtworksByArtistId(UUID artistId) {
         return artworkRepository.findByArtistId(artistId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ArtworkResponse> getMyArtworks(String artistEmail) {
+        Artist artist = artistRepository.findByEmail(artistEmail).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return artworkRepository.findByArtistId(artist.getId()).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -77,6 +91,13 @@ public class ArtworkService {
 
     public List<ArtworkResponse> searchArtworks(String query) {
         return artworkRepository.searchPublicArtworks(query).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ArtworkResponse> searchArtworksByArtistSlug(String slug, String query) {
+        Artist artist = artistRepository.findBySlug(slug).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return artworkRepository.searchPublicArtworksByArtistId(artist.getId(), query).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

@@ -34,7 +34,7 @@ public class ArtworkController {
     @PreAuthorize("permitAll()")
     @Operation(summary = "Lister les oeuvres d'une boutique (tenant spécifique)")
     public ResponseEntity<List<ArtworkResponse>> getAllPublicArtworks(@PathVariable String artistSlug) {
-        return ResponseEntity.ok(artworkService.getPublicArtworks());
+        return ResponseEntity.ok(artworkService.getPublicArtworksByArtistSlug(artistSlug));
     }
 
     @GetMapping("/v1/public/{artistSlug}/artworks/{id}")
@@ -48,7 +48,7 @@ public class ArtworkController {
     @PreAuthorize("permitAll()")
     @Operation(summary = "Rechercher des oeuvres dans une boutique spécifique")
     public ResponseEntity<List<ArtworkResponse>> searchArtworks(@PathVariable String artistSlug, @RequestParam String q) {
-        return ResponseEntity.ok(artworkService.searchArtworks(q));
+        return ResponseEntity.ok(artworkService.searchArtworksByArtistSlug(artistSlug, q));
     }
 
     @PostMapping("/artworks")
@@ -59,6 +59,13 @@ public class ArtworkController {
             @Valid @RequestBody ArtworkCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(artworkService.createArtwork(userDetails.getUsername(), request));
+    }
+
+    @GetMapping("/artworks/me")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Lister mes oeuvres (Artiste - Dashboard)")
+    public ResponseEntity<List<ArtworkResponse>> getMyArtworks(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(artworkService.getMyArtworks(userDetails.getUsername()));
     }
 
     @GetMapping("/public/artworks/featured")

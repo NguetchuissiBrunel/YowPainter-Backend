@@ -72,6 +72,13 @@ public class ShopService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProductResponse> getProductsByArtistSlug(String slug) {
+        Artist artist = artistRepository.findBySlug(slug).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return productRepository.findByArtistIdAndIsActiveTrue(artist.getId()).stream()
+                .map(this::mapToProductResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public OrderResponse placeOrder(String buyerEmail, OrderCreateRequest request) {
         AppUser buyer = appUserRepository.findByEmail(buyerEmail).orElseThrow();

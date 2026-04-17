@@ -20,8 +20,14 @@ public interface ArtworkRepository extends JpaRepository<Artwork, UUID> {
     @Query("SELECT a FROM Artwork a WHERE a.status = 'PUBLISHED' OR a.status = 'ON_SALE' ORDER BY a.publishedAt DESC")
     List<Artwork> findPublicArtworks();
 
+    @Query("SELECT a FROM Artwork a WHERE a.artistId = :artistId AND (a.status = 'PUBLISHED' OR a.status = 'ON_SALE') ORDER BY a.publishedAt DESC")
+    List<Artwork> findPublicArtworksByArtistId(@Param("artistId") UUID artistId);
+
     @Query("SELECT a FROM Artwork a WHERE (LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(a.description) LIKE LOWER(CONCAT('%', :q, '%'))) AND (a.status = 'PUBLISHED' OR a.status = 'ON_SALE')")
     List<Artwork> searchPublicArtworks(@Param("q") String q);
+
+    @Query("SELECT a FROM Artwork a WHERE a.artistId = :artistId AND (LOWER(a.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(a.description) LIKE LOWER(CONCAT('%', :q, '%'))) AND (a.status = 'PUBLISHED' OR a.status = 'ON_SALE')")
+    List<Artwork> searchPublicArtworksByArtistId(@Param("artistId") UUID artistId, @Param("q") String q);
 
     @Query("SELECT a FROM Artwork a WHERE a.status = 'ON_SALE' ORDER BY a.likeCount DESC")
     List<Artwork> findFeaturedArtworks();

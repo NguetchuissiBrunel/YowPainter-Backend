@@ -47,7 +47,7 @@ public class ShopController {
     @GetMapping("/v1/public/{artistSlug}/products")
     @Operation(summary = "Lister le catalogue de ventes d'une boutique (tenant spécifique)")
     public ResponseEntity<List<ProductResponse>> getProductsByArtist(@PathVariable String artistSlug) {
-        return ResponseEntity.ok(shopService.getProductsByArtist(null));
+        return ResponseEntity.ok(shopService.getProductsByArtistSlug(artistSlug));
     }
 
     @PostMapping("/v1/public/{artistSlug}/orders")

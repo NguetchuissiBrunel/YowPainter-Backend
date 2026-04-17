@@ -41,9 +41,16 @@ public class EventController {
 
     @GetMapping("/public/artists/{artistId}/events")
     @PreAuthorize("permitAll()")
-    @Operation(summary = "Lister les événements d'un artiste spécifique")
+    @Operation(summary = "Lister les événements d'un artiste spécifique par ID")
     public ResponseEntity<List<EventResponse>> getEventsByArtist(@PathVariable UUID artistId) {
         return ResponseEntity.ok(eventService.getEventsByArtistId(artistId));
+    }
+
+    @GetMapping("/v1/public/{artistSlug}/events")
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Lister les événements d'un artiste spécifique par slug")
+    public ResponseEntity<List<EventResponse>> getEventsByArtistSlug(@PathVariable String artistSlug) {
+        return ResponseEntity.ok(eventService.getEventsByArtistSlug(artistSlug));
     }
 
     @GetMapping("/public/events/{id}")
@@ -68,6 +75,13 @@ public class EventController {
             @Valid @RequestBody EventCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(eventService.createEvent(userDetails.getUsername(), request));
+    }
+
+    @GetMapping("/events/me")
+    @PreAuthorize("hasRole('ARTIST')")
+    @Operation(summary = "Lister mes événements (Artiste - Dashboard)")
+    public ResponseEntity<List<EventResponse>> getMyEvents(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(eventService.getMyEvents(userDetails.getUsername()));
     }
 
     @PutMapping("/events/{id}")

@@ -65,6 +65,21 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    public List<EventResponse> getEventsByArtistSlug(String slug) {
+        Artist artist = artistRepository.findBySlug(slug).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return eventRepository.findByArtistId(artist.getId()).stream()
+                .filter(e -> e.getStatus() == EventStatus.PUBLISHED)
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<EventResponse> getMyEvents(String artistEmail) {
+        Artist artist = artistRepository.findByEmail(artistEmail).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
+        return eventRepository.findByArtistId(artist.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public EventResponse getEventById(UUID id) {
         return mapToResponse(eventRepository.findById(id).orElseThrow());
     }
