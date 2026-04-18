@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate # Sécurisé pour la production (rétablis après déploiement réussi)
+      ddl-auto: update # Temporairement passé en update pour appliquer l'ajout de la colonne 'bio'
     show-sql: true
     properties:
       hibernate:
