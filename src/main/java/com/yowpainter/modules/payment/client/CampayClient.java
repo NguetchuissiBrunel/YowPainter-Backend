@@ -90,6 +90,25 @@ public class CampayClient {
         }
     }
 
+    public WithdrawalResponse withdraw(String token, WithdrawalRequest withdrawalRequest) throws Exception {
+        String jsonBody = objectMapper.writeValueAsString(withdrawalRequest);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(config.getBaseUrl() + config.getWithdrawUrl()))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Token " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 200 || response.statusCode() == 201) {
+            return objectMapper.readValue(response.body(), WithdrawalResponse.class);
+        } else {
+            log.error("Failed to withdraw via CamPay: {}", response.body());
+            throw new RuntimeException("CamPay Withdrawal Error");
+        }
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -120,5 +139,24 @@ public class CampayClient {
         private String currency;
         private String operator;
         private String external_reference;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WithdrawalRequest {
+        private String amount;
+        private String to; // Numéro de téléphone Mobile Money
+        private String description;
+        private String external_reference;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WithdrawalResponse {
+        private String reference;
+        private String status;
     }
 }

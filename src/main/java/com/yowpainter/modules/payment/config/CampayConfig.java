@@ -25,4 +25,7 @@ public class CampayConfig {
 
     @Value("${app.payment.campay.transaction-url:/transaction/}")
     private String transactionUrl;
+
+    @Value("${app.payment.campay.withdraw-url:/withdraw/}")
+    private String withdrawUrl;
 }

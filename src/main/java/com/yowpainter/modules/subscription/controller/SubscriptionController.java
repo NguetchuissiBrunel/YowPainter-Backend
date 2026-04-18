@@ -31,7 +31,8 @@ public class SubscriptionController {
         return ResponseEntity.ok(Arrays.stream(SubscriptionPlan.values())
                 .map(p -> Map.of(
                         "name", p.name(),
-                        "price", p == SubscriptionPlan.FREE ? 0 : (p == SubscriptionPlan.PRO ? 19 : 49),
+                        "price", p.getPrice(),
+                        "currency", p.getCurrency(),
                         "features", p == SubscriptionPlan.FREE ? List.of("5 artworks") : List.of("Unlimited artworks")
                 )).collect(Collectors.toList()));
     }
@@ -43,12 +44,15 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.getSubscriptionForArtist(userDetails.getUsername()));
     }
 
-    @PostMapping("/upgrade")
+    @PostMapping("/upgrade/checkout")
     @PreAuthorize("hasRole('ARTIST')")
-    @Operation(summary = "Passer a un forfait superieur")
-    public ResponseEntity<Void> upgradePlan(@AuthenticationPrincipal UserDetails userDetails, @RequestParam SubscriptionPlan planName) {
-        subscriptionService.upgradePlan(userDetails.getUsername(), planName);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "Initier le paiement Mobile Money pour un forfait")
+    public ResponseEntity<Map<String, String>> checkoutUpgrade(
+            @AuthenticationPrincipal UserDetails userDetails, 
+            @RequestParam SubscriptionPlan plan,
+            @RequestParam String phoneNumber) {
+        String paymentReference = subscriptionService.initiateSubscriptionUpgrade(userDetails.getUsername(), plan, phoneNumber);
+        return ResponseEntity.ok(Map.of("paymentReference", paymentReference));
     }
 
     @DeleteMapping("/cancel")

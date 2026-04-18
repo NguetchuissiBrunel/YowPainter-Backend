@@ -13,11 +13,23 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final ArtistRepository artistRepository;
+    private final com.yowpainter.modules.payment.service.PaymentService paymentService;
+    private final com.yowpainter.shared.tenant.TenantIdentifierResolver tenantResolver;
+
+    public SubscriptionService(
+            SubscriptionRepository subscriptionRepository,
+            ArtistRepository artistRepository,
+            @org.springframework.context.annotation.Lazy com.yowpainter.modules.payment.service.PaymentService paymentService,
+            com.yowpainter.shared.tenant.TenantIdentifierResolver tenantResolver) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.artistRepository = artistRepository;
+        this.paymentService = paymentService;
+        this.tenantResolver = tenantResolver;
+    }
 
     public Subscription getSubscriptionForArtist(String email) {
         Artist artist = artistRepository.findByEmail(email)
@@ -46,6 +58,35 @@ public class SubscriptionService {
         sub.setStartDate(LocalDateTime.now());
         // Simuler 30 jours
         sub.setEndDate(LocalDateTime.now().plusDays(30));
+        subscriptionRepository.save(sub);
+    }
+
+    @Transactional
+    public String initiateSubscriptionUpgrade(String email, SubscriptionPlan plan, String phoneNumber) {
+        Artist artist = artistRepository.findByEmail(email).orElseThrow();
+        String tenantId = tenantResolver.resolveCurrentTenantIdentifier();
+        
+        // On utilise l'ID de l'artiste comme référence. 
+        // Note: Si l'utilisateur fait plusieurs tentatives, cela écrasera la précédente dans le polling
+        return paymentService.initiateMobileMoneyPayment(
+                artist.getId(), 
+                "SUBSCRIPTION", 
+                plan.getPrice(), 
+                tenantId, 
+                email, 
+                phoneNumber
+        );
+    }
+
+    @Transactional
+    public void confirmUpgrade(UUID artistId, SubscriptionPlan plan) {
+        Subscription sub = subscriptionRepository.findByArtistId(artistId)
+                .orElseGet(() -> createDefaultSubscription(artistId));
+        
+        sub.setPlan(plan);
+        sub.setStartDate(LocalDateTime.now());
+        sub.setEndDate(LocalDateTime.now().plusDays(30));
+        sub.setActive(true);
         subscriptionRepository.save(sub);
     }
 

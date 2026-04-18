@@ -9,6 +9,8 @@ import com.yowpainter.modules.shop.entity.PaymentStatus;
 import com.yowpainter.modules.shop.repository.PaymentRepository;
 import com.yowpainter.modules.shop.service.ShopService;
 import com.yowpainter.modules.payment.dto.PaymentResponse;
+import com.yowpainter.modules.artist.entity.Artist;
+import com.yowpainter.modules.subscription.service.SubscriptionService;
 import com.yowpainter.modules.payment.client.CampayClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -32,9 +33,34 @@ public class PaymentService {
     private final ShopService shopService;
     private final EventService eventService;
     private final CampayClient campayClient;
+    private final WalletService walletService;
     private final com.yowpainter.modules.notification.service.NotificationService notificationService;
     private final com.yowpainter.modules.artist.repository.ArtistRepository artistRepository;
     private final com.yowpainter.modules.auth.service.EmailService emailService;
+    private final com.yowpainter.modules.subscription.service.SubscriptionService subscriptionService;
+
+    public PaymentService(
+            PaymentRepository paymentRepository,
+            AppUserRepository userRepository,
+            ShopService shopService,
+            EventService eventService,
+            CampayClient campayClient,
+            WalletService walletService,
+            com.yowpainter.modules.notification.service.NotificationService notificationService,
+            com.yowpainter.modules.artist.repository.ArtistRepository artistRepository,
+            com.yowpainter.modules.auth.service.EmailService emailService,
+            @org.springframework.context.annotation.Lazy com.yowpainter.modules.subscription.service.SubscriptionService subscriptionService) {
+        this.paymentRepository = paymentRepository;
+        this.userRepository = userRepository;
+        this.shopService = shopService;
+        this.eventService = eventService;
+        this.campayClient = campayClient;
+        this.walletService = walletService;
+        this.notificationService = notificationService;
+        this.artistRepository = artistRepository;
+        this.emailService = emailService;
+        this.subscriptionService = subscriptionService;
+    }
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
@@ -105,6 +131,13 @@ public class PaymentService {
             return;
         }
 
+        // VERIFICATION DE SECURITE : On interroge CamPay directement pour confirmer le statut et le montant
+        if (!verifyPaymentWithProvider(payment, providerReference)) {
+            log.error("Payment verification failed for reference: {}. Possible fraud attempt.", referenceId);
+            processFailedPayment(providerReference, externalReference, "VERIFICATION_FAILED");
+            return;
+        }
+
         payment.setStatus(PaymentStatus.SUCCEEDED);
         payment.setProviderReference(providerReference);
         paymentRepository.save(payment);
@@ -119,23 +152,46 @@ public class PaymentService {
             String referenceType = payment.getReferenceType();
             UUID userId = payment.getUserId();
 
-            if ("ORDER".equals(referenceType)) {
-                shopService.updateOrderStatus(referenceId, OrderStatus.PAID);
-                notificationService.createNotification(userId, "Votre commande #" + referenceId.toString().substring(0, 8) + " a été payée avec succès !");
-                emailService.sendPaymentConfirmation(user.getEmail(), referenceId.toString().substring(0, 8), payment.getAmount());
+            if ("ORDER".equals(referenceType) || "RESERVATION".equals(referenceType)) {
+                // ... logique existante de commande/réservation ...
+                if ("ORDER".equals(referenceType)) {
+                    shopService.updateOrderStatus(referenceId, OrderStatus.PAID);
+                    notificationService.createNotification(userId, "Votre commande #" + referenceId.toString().substring(0, 8) + " a été payée avec succès !");
+                    emailService.sendPaymentConfirmation(user.getEmail(), referenceId.toString().substring(0, 8), payment.getAmount());
+                } else {
+                    eventService.confirmPaidReservation(referenceId);
+                    notificationService.createNotification(userId, "Votre réservation a été confirmée !");
+                    emailService.sendPaymentConfirmation(user.getEmail(), "Réservation #" + referenceId.toString().substring(0, 8), payment.getAmount());
+                }
                 
-                // Notifier l'artiste
-                var artist = artistRepository.findBySlug(payment.getTenantId());
-                artist.ifPresent(a -> emailService.sendNewSaleNotification(a.getEmail(), referenceId.toString().substring(0, 8), payment.getAmount()));
+                // NOTIFICATION ET CREDIT DU WALLET DE L'ARTISTE
+                var artistOpt = artistRepository.findBySlug(payment.getTenantId());
+                if (artistOpt.isPresent()) {
+                    Artist artist = artistOpt.get();
+                    
+                    // Calcul de la commission dynamique basée sur l'abonnement
+                    var sub = subscriptionService.getSubscriptionForArtist(artist.getEmail());
+                    java.math.BigDecimal rate = sub.getPlan().getCommissionRate();
+                    java.math.BigDecimal commission = payment.getAmount().multiply(rate);
+                    java.math.BigDecimal netAmount = payment.getAmount().subtract(commission);
+                    
+                    // Créditer le portefeuille
+                    walletService.creditWallet(
+                        artist, 
+                        netAmount, 
+                        com.yowpainter.modules.payment.entity.WalletTransactionType.SALE, 
+                        payment.getId(), 
+                        "Vente " + (referenceType.equals("ORDER") ? "oeuvre" : "billet") + " #" + referenceId.toString().substring(0, 8)
+                    );
+                    
+                    emailService.sendNewSaleNotification(artist.getEmail(), referenceId.toString().substring(0, 8), netAmount);
+                }
                 
-            } else if ("RESERVATION".equals(referenceType)) {
-                eventService.confirmPaidReservation(referenceId);
-                notificationService.createNotification(userId, "Votre réservation a été confirmée !");
-                emailService.sendPaymentConfirmation(user.getEmail(), "Réservation #" + referenceId.toString().substring(0, 8), payment.getAmount());
-                
-                // Notifier l'artiste
-                var artist = artistRepository.findBySlug(payment.getTenantId());
-                artist.ifPresent(a -> emailService.sendNewSaleNotification(a.getEmail(), "Nouvelle réservation", payment.getAmount()));
+            } else if ("SUBSCRIPTION".equals(referenceType)) {
+                com.yowpainter.modules.subscription.entity.SubscriptionPlan plan = deducePlanFromAmount(payment.getAmount());
+                subscriptionService.confirmUpgrade(referenceId, plan);
+                notificationService.createNotification(userId, "Votre abonnement " + plan.name() + " a été activé avec succès !");
+                emailService.sendPaymentConfirmation(user.getEmail(), "Abonnement " + plan.name(), payment.getAmount());
             }
         } finally {
             com.yowpainter.shared.tenant.TenantContext.clear();
@@ -163,6 +219,37 @@ public class PaymentService {
         notificationService.createNotification(payment.getUserId(), "Le paiement pour votre " + 
                 (payment.getReferenceType().equals("ORDER") ? "commande" : "réservation") + 
                 " a échoué. (" + status + ")");
+    }
+
+    private com.yowpainter.modules.subscription.entity.SubscriptionPlan deducePlanFromAmount(BigDecimal amount) {
+        if (amount.compareTo(new BigDecimal("25000")) >= 0) return com.yowpainter.modules.subscription.entity.SubscriptionPlan.ELITE;
+        if (amount.compareTo(new BigDecimal("10000")) >= 0) return com.yowpainter.modules.subscription.entity.SubscriptionPlan.PRO;
+        return com.yowpainter.modules.subscription.entity.SubscriptionPlan.FREE;
+    }
+
+    private boolean verifyPaymentWithProvider(Payment payment, String providerReference) {
+        try {
+            String token = campayClient.getToken();
+            CampayClient.TransactionStatusResponse status = campayClient.checkTransactionStatus(token, providerReference);
+            
+            // 1. Vérifier le statut chez le fournisseur
+            if (!"SUCCESSFUL".equals(status.getStatus())) {
+                log.warn("Provider status is not SUCCESSFUL: {}", status.getStatus());
+                return false;
+            }
+            
+            // 2. Vérifier que le montant correspond (sécurité contre le changement de prix côté client)
+            BigDecimal providerAmount = new BigDecimal(status.getAmount());
+            if (providerAmount.compareTo(payment.getAmount()) != 0) {
+                log.error("Amount mismatch! Expected: {}, Provider reported: {}", payment.getAmount(), providerAmount);
+                return false;
+            }
+            
+            return true;
+        } catch (Exception e) {
+            log.error("Error during payment verification", e);
+            return false;
+        }
     }
 
     private PaymentResponse mapToPaymentResponse(Payment payment) {

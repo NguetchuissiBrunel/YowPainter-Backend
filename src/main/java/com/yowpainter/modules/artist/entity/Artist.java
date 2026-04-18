@@ -44,4 +44,9 @@ public class Artist extends AppUser {
     @Column(name = "tenant_id")
     private UUID tenantId;
 
+    @Column(name = "payout_phone")
+    private String payoutPhone;
+
+    @Column(name = "payout_network")
+    private String payoutNetwork;
 }

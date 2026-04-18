@@ -62,6 +62,7 @@ app:
       token-url: /token/
       collect-url: /collect/
       transaction-url: /transaction/
+      withdraw-url: /withdraw/
 
 springdoc:
   api-docs:
