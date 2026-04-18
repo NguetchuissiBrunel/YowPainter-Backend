@@ -34,7 +34,6 @@ spring:
     # Permet de reparer automatiquement en cas de mismatch de checksum si supporté par la version
     # Sinon forcera au moins l'execution des migrations manquantes
     validate-on-migrate: true
-    repair-on-migrate: true
 
   # Configuration de l'envoi d'emails (Spring Boot 4)
   mail:
