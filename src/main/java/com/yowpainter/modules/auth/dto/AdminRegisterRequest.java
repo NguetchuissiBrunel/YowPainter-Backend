@@ -27,6 +27,7 @@ public class AdminRegisterRequest {
     @NotBlank(message = "Le mot de passe est requis")
     private String password;
 
+    @Schema(name = "imageURL", description = "URL de l'image de profil", example = "https://res.cloudinary.com/...")
     @JsonProperty("imageURL")
     private String imageUrl;
 }

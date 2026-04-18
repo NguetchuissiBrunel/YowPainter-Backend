@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # Sécurisé pour la production (testé temporairement pour unifier le schéma)
+      ddl-auto: validate # Sécurisé pour la production (rétablis après déploiement réussi)
     show-sql: true
     properties:
       hibernate:

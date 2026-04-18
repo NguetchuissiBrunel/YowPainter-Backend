@@ -1,5 +1,6 @@
 package com.yowpainter.modules.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,8 @@ public class AuthResponse {
     private String email;
     private String firstName;
     private String lastName;
-    private String profilePictureUrl;
+    @JsonProperty("imageURL")
+    private String imageUrl;
     private String role;
     private String tenantId;
     private String artistName;
