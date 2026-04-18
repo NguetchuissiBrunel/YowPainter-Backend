@@ -79,6 +79,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(UserRole.ROLE_ADMIN)
+                .profilePictureUrl(request.getProfilePictureUrl())
                 .build();
         
         AppUser savedUser = userRepository.save(admin);
@@ -135,6 +136,7 @@ public class AuthService {
                     .role(UserRole.ROLE_ARTIST)
                     .artistName(request.getArtistName())
                     .slug(slug)
+                    .profilePictureUrl(request.getProfilePictureUrl())
                     .status("ACTIVE")
                     .build();
             savedUser = artistRepository.save(artist);
@@ -149,6 +151,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .passwordHash(passwordEncoder.encode(request.getPassword()))
                     .role(UserRole.ROLE_ADMIN)
+                    .profilePictureUrl(request.getProfilePictureUrl())
                     .build();
             savedUser = userRepository.save(admin);
         } else {
@@ -158,6 +161,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .passwordHash(passwordEncoder.encode(request.getPassword()))
                     .role(UserRole.ROLE_BUYER)
+                    .profilePictureUrl(request.getProfilePictureUrl())
                     .build();
             savedUser = userRepository.save(buyer);
         }

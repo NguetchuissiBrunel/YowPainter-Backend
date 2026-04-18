@@ -25,4 +25,6 @@ public class AdminRegisterRequest {
 
     @NotBlank(message = "Le mot de passe est requis")
     private String password;
+
+    private String profilePictureUrl;
 }

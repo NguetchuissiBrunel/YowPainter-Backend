@@ -34,5 +34,8 @@ public class RegisterRequest {
     // Spécifique si role = ROLE_ARTIST
     private String artistName;
     @Schema(description = "Slug unique (URL). Sera auto-généré si vide.", example = "jean-dupont")
-    private String slug; 
+    private String slug;
+
+    @Schema(description = "URL de l'image de profil", example = "https://res.cloudinary.com/...")
+    private String profilePictureUrl;
 }
