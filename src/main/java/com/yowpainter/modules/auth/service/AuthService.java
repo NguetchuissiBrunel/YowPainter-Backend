@@ -178,7 +178,7 @@ public class AuthService {
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
-                .profilePictureUrl(savedUser.getProfilePictureUrl())
+                .imageUrl(savedUser.getProfilePictureUrl())
                 .role(savedUser.getRole().name())
                 .tenantId(tenantId)
                 .artistName(savedUser instanceof Artist ? ((Artist) savedUser).getArtistName() : null)
