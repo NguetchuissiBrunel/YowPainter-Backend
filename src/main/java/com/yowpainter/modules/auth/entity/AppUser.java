@@ -40,6 +40,9 @@ public class AppUser implements UserDetails {
     private String lastName;
 
     private String profilePictureUrl;
+    
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;

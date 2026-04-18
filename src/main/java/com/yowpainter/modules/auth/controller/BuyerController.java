@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yowpainter.modules.auth.repository.AppUserRepository;
 import com.yowpainter.modules.auth.entity.AppUser;
 import com.yowpainter.modules.auth.dto.UpdateProfilePictureRequest;
+import com.yowpainter.modules.auth.dto.BuyerUpdateRequest;
 import com.yowpainter.modules.auth.dto.BuyerProfileResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,6 +45,21 @@ public class BuyerController {
         user.setProfilePictureUrl(request.getProfilePictureUrl());
         return ResponseEntity.ok(mapToResponse(userRepository.save(user)));
     }
+    
+    @PutMapping("/me")
+    @Operation(summary = "Mettre à jour le profil de l'acheteur")
+    public ResponseEntity<BuyerProfileResponse> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody BuyerUpdateRequest request) {
+        AppUser user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+        
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setBio(request.getBio());
+        
+        return ResponseEntity.ok(mapToResponse(userRepository.save(user)));
+    }
 
     private BuyerProfileResponse mapToResponse(AppUser user) {
         return BuyerProfileResponse.builder()
@@ -52,6 +68,7 @@ public class BuyerController {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .profilePictureUrl(user.getProfilePictureUrl())
+                .bio(user.getBio())
                 .role(user.getRole().name())
                 .build();
     }

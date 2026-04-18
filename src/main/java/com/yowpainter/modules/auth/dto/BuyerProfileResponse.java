@@ -16,5 +16,6 @@ public class BuyerProfileResponse {
     private String lastName;
     private String email;
     private String profilePictureUrl;
+    private String bio;
     private String role;
 }

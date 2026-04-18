@@ -32,9 +32,6 @@ public class Artist extends AppUser {
     @Column(name = "artist_name", nullable = false)
     private String artistName;
 
-    @Column(columnDefinition = "TEXT")
-    private String bio;
-
     private String bannerUrl;
     private String location;
     private String status;
