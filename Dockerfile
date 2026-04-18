@@ -20,5 +20,5 @@ COPY --from=build /app/target/*.jar app.jar
 # Port par défaut
 EXPOSE 8080
 
-# Lancement de l'application directement
-ENTRYPOINT ["java", "-Xmx384m", "-Xms128m", "-jar", "app.jar"]
+# Lancement de l'application avec un peu plus de mémoire pour le démarrage
+ENTRYPOINT ["java", "-Xmx420m", "-Xms160m", "-jar", "app.jar"]
