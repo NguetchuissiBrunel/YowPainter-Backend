@@ -1,5 +1,6 @@
 package com.yowpainter.modules.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yowpainter.modules.auth.entity.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -37,5 +38,6 @@ public class RegisterRequest {
     private String slug;
 
     @Schema(description = "URL de l'image de profil", example = "https://res.cloudinary.com/...")
-    private String profilePictureUrl;
+    @JsonProperty("imageURL")
+    private String imageUrl;
 }

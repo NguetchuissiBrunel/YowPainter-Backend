@@ -1,5 +1,6 @@
 package com.yowpainter.modules.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -26,5 +27,6 @@ public class AdminRegisterRequest {
     @NotBlank(message = "Le mot de passe est requis")
     private String password;
 
-    private String profilePictureUrl;
+    @JsonProperty("imageURL")
+    private String imageUrl;
 }
