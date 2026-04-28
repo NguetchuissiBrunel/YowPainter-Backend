@@ -30,8 +30,8 @@ public class OrderTimeoutScheduler {
     private final ShopService shopService;
     private final ArtistRepository artistRepository;
 
-    // Run every 15 minutes (900000 ms)
-    @Scheduled(fixedRate = 900000)
+    // Run every 15 minutes, start after 1 minute
+    @Scheduled(fixedRate = 900000, initialDelay = 60000)
     public void cancelAbandonedOrders() {
         log.info("Starting Multi-Tenant Abandoned Orders Cleanup...");
         

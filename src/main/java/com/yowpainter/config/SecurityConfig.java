@@ -50,6 +50,7 @@ public class SecurityConfig {
                         "/api/v1/public/**",
                         "/api/shop/v1/public/**",
                         "/api/admin/auth/**",
+                        "/api/public/health",
                         "/api-docs/**",
                         "/v3/api-docs",
                         "/v3/api-docs/**",

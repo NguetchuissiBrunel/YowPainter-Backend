@@ -19,8 +19,8 @@ public class ReservationTimeoutScheduler {
     private final EventService eventService;
     private final ArtistRepository artistRepository;
 
-    // Run every 15 minutes (900000 ms)
-    @Scheduled(fixedRate = 900000)
+    // Run every 15 minutes, start after 1 minute to allow server to bind port
+    @Scheduled(fixedRate = 900000, initialDelay = 60000)
     public void cleanupAbandonedReservations() {
         log.info("Starting Multi-Tenant Event Reservations Cleanup...");
         

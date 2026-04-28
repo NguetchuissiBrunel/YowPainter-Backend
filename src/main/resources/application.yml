@@ -14,7 +14,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     # Propriete importante pour que Hibernate recupere correctement le metadata multi-schema
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 20
       schema: public
 
   jpa:
