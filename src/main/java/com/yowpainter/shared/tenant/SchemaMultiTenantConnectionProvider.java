@@ -1,5 +1,6 @@
 package com.yowpainter.shared.tenant;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +8,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@Slf4j
 @Component
 public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectionProvider<String> {
 
@@ -28,6 +30,7 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
 
     @Override
     public Connection getConnection(String tenantIdentifier) throws SQLException {
+        log.info("Hibernate requesting connection for tenant: {}", tenantIdentifier);
         Connection connection = getAnyConnection();
         // Basculer sur le schema PostgreSQL du tenant
         connection.setSchema(tenantIdentifier);

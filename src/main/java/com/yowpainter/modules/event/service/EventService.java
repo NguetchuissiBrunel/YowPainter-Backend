@@ -12,14 +12,22 @@ import com.yowpainter.modules.event.repository.ReservationRepository;
 import com.yowpainter.modules.event.repository.TicketRepository;
 import com.yowpainter.modules.auth.entity.AppUser;
 import com.yowpainter.modules.auth.repository.AppUserRepository;
+import com.yowpainter.shared.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +40,7 @@ public class EventService {
     private final ArtistRepository artistRepository;
     private final AppUserRepository userRepository;
     private final TicketRepository ticketRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Transactional
     public EventResponse createEvent(String artistEmail, EventCreateRequest request) {
@@ -54,8 +63,36 @@ public class EventService {
     }
 
     public List<EventResponse> getUpcomingEvents() {
-        return eventRepository.findUpcomingEvents(LocalDateTime.now()).stream()
-                .map(this::mapToResponse)
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel event aggregation for {} artists", artists.size());
+        
+        LocalDateTime now = LocalDateTime.now();
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<EventResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            List<Event> events = eventRepository.findUpcomingEvents(now);
+                            log.debug("Found {} events for tenant {}", events.size(), artist.getSlug());
+                            return events.stream()
+                                    .map(this::mapToResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        List<EventResponse> allEvents = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        return allEvents.stream()
+                .sorted(Comparator.comparing(EventResponse::getStartDateTime))
                 .collect(Collectors.toList());
     }
 
@@ -85,8 +122,29 @@ public class EventService {
     }
 
     public List<EventResponse> searchEvents(String query) {
-        return eventRepository.searchPublicEvents(query).stream()
-                .map(this::mapToResponse)
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel event search for {} artists", artists.size());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<EventResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            return eventRepository.searchPublicEvents(query).stream()
+                                    .map(this::mapToResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 

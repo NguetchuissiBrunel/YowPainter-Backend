@@ -50,6 +50,12 @@ public class ShopController {
         return ResponseEntity.ok(shopService.getProductsByArtistSlug(artistSlug));
     }
 
+    @GetMapping("/v1/public/products")
+    @Operation(summary = "Lister tous les produits en vente sur la plateforme (tous artistes confondus)")
+    public ResponseEntity<List<ProductResponse>> getGlobalProducts() {
+        return ResponseEntity.ok(shopService.getAllPublicProducts());
+    }
+
     @PostMapping("/v1/public/{artistSlug}/orders")
     @PreAuthorize("hasRole('BUYER')")
     @Operation(summary = "Passer une commande dans une boutique spécifique")

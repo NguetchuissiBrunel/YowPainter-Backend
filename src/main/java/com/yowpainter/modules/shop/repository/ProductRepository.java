@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
+    List<Product> findByIsActiveTrue();
     List<Product> findByArtistIdAndIsActiveTrue(UUID artistId);
     List<Product> findByArtistId(UUID artistId);
     Optional<Product> findByArtworkId(UUID artworkId);

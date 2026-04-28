@@ -22,6 +22,7 @@ com\yowpainter\modules\notification\controller\NotificationController.class
 com\yowpainter\modules\event\entity\Event$EventBuilder.class
 com\yowpainter\modules\notification\entity\Notification$NotificationBuilder.class
 com\yowpainter\modules\auth\controller\BuyerController.class
+com\yowpainter\modules\auth\dto\BuyerUpdateRequest.class
 com\yowpainter\modules\admin\service\AdminService.class
 com\yowpainter\modules\notification\service\NotificationService.class
 com\yowpainter\modules\artwork\service\ArtworkService.class
@@ -66,6 +67,7 @@ com\yowpainter\modules\auth\controller\AuthController.class
 com\yowpainter\modules\event\dto\TicketResponse$TicketResponseBuilder.class
 com\yowpainter\modules\auth\dto\AdminRegisterRequest$AdminRegisterRequestBuilder.class
 com\yowpainter\modules\artwork\entity\ArtworkStyle.class
+com\yowpainter\modules\auth\dto\BuyerUpdateRequest$BuyerUpdateRequestBuilder.class
 com\yowpainter\modules\payment\entity\Wallet.class
 com\yowpainter\modules\shop\dto\OrderResponse$OrderResponseBuilder.class
 com\yowpainter\modules\event\dto\TicketResponse.class

@@ -9,6 +9,10 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+    open-in-view: true
+  logging:
+    level:
+      com.yowpainter: DEBUG
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect

@@ -11,15 +11,19 @@ import com.yowpainter.modules.shop.entity.*;
 import com.yowpainter.modules.shop.repository.OrderRepository;
 import com.yowpainter.modules.shop.repository.PaymentRepository;
 import com.yowpainter.modules.shop.repository.ProductRepository;
+import com.yowpainter.shared.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,6 +37,7 @@ public class ShopService {
     private final ArtworkRepository artworkRepository;
     private final ArtistRepository artistRepository;
     private final AppUserRepository appUserRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Transactional
     public ProductResponse createProduct(String artistEmail, ProductCreateRequest request) {
@@ -76,6 +81,33 @@ public class ShopService {
         Artist artist = artistRepository.findBySlug(slug).orElseThrow(() -> new IllegalArgumentException("Artiste non trouve"));
         return productRepository.findByArtistIdAndIsActiveTrue(artist.getId()).stream()
                 .map(this::mapToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductResponse> getAllPublicProducts() {
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel product aggregation for {} artists", artists.size());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<ProductResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            return productRepository.findByIsActiveTrue().stream()
+                                    .map(this::mapToProductResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 

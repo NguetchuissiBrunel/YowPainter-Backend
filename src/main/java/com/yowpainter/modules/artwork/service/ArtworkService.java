@@ -11,17 +11,21 @@ import com.yowpainter.modules.auth.entity.AppUser;
 import com.yowpainter.modules.auth.repository.AppUserRepository;
 import com.yowpainter.modules.shop.repository.ProductRepository;
 import com.yowpainter.modules.notification.service.NotificationService;
+import com.yowpainter.shared.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ArtworkService {
@@ -33,6 +37,7 @@ public class ArtworkService {
     private final ArtworkCommentRepository commentRepository;
     private final ProductRepository productRepository;
     private final NotificationService notificationService;
+    private final PlatformTransactionManager transactionManager;
 
     @Transactional
     public ArtworkResponse createArtwork(String artistEmail, ArtworkCreateRequest request) {
@@ -56,8 +61,30 @@ public class ArtworkService {
     }
 
     public List<ArtworkResponse> getPublicArtworks() {
-        return artworkRepository.findPublicArtworks().stream()
-                .map(this::mapToResponse)
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel artwork aggregation for {} artists", artists.size());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<ArtworkResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            return artworkRepository.findPublicArtworks().stream()
+                                    .map(this::mapToResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .sorted(Comparator.comparing(ArtworkResponse::getPublishedAt, Comparator.nullsLast(Comparator.<LocalDateTime>reverseOrder())))
                 .collect(Collectors.toList());
     }
 
@@ -90,8 +117,29 @@ public class ArtworkService {
     }
 
     public List<ArtworkResponse> searchArtworks(String query) {
-        return artworkRepository.searchPublicArtworks(query).stream()
-                .map(this::mapToResponse)
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel artwork search for {} artists", artists.size());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<ArtworkResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            return artworkRepository.searchPublicArtworks(query).stream()
+                                    .map(this::mapToResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 
@@ -103,8 +151,30 @@ public class ArtworkService {
     }
 
     public List<ArtworkResponse> getFeaturedArtworks() {
-        return artworkRepository.findFeaturedArtworks().stream()
-                .map(this::mapToResponse)
+        List<Artist> artists = artistRepository.findAll();
+        log.info("Starting parallel featured artworks fetch for {} artists", artists.size());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setReadOnly(true);
+
+        List<CompletableFuture<List<ArtworkResponse>>> futures = artists.stream()
+                .map(artist -> CompletableFuture.supplyAsync(() -> {
+                    return TenantContext.executeInTenant(artist.getSlug(), () -> 
+                        transactionTemplate.execute(status -> {
+                            return artworkRepository.findFeaturedArtworks().stream()
+                                    .map(this::mapToResponse)
+                                    .collect(Collectors.toList());
+                        })
+                    );
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .sorted(Comparator.comparing(ArtworkResponse::getLikeCount).reversed())
                 .collect(Collectors.toList());
     }
 

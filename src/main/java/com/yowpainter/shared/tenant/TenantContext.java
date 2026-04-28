@@ -16,4 +16,14 @@ public class TenantContext {
     public static void clear() {
         currentTenant.remove();
     }
+
+    public static <T> T executeInTenant(String tenantId, java.util.function.Supplier<T> task) {
+        String oldTenant = getTenantId();
+        setTenantId(tenantId);
+        try {
+            return task.get();
+        } finally {
+            setTenantId(oldTenant);
+        }
+    }
 }
