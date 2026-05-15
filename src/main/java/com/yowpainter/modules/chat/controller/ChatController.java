@@ -7,14 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ChatController {
 
@@ -36,20 +35,31 @@ public class ChatController {
         );
     }
 
-    @GetMapping("/api/messages/{senderId}/{recipientId}")
+    @GetMapping("/messages/{senderId}/{recipientId}")
     public ResponseEntity<List<ChatMessageDto>> findChatMessages(
             @PathVariable UUID senderId,
             @PathVariable UUID recipientId) {
         return ResponseEntity.ok(chatMessageService.findChatMessages(senderId, recipientId));
     }
 
-    @GetMapping("/api/chat/contacts/{userId}")
+    @GetMapping("/chat/contacts/{userId}")
     public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> getContacts(@PathVariable UUID userId) {
         return ResponseEntity.ok(chatMessageService.getRecentContacts(userId));
     }
 
-    @GetMapping("/api/chat/search")
-    public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> searchUsers(@org.springframework.web.bind.annotation.RequestParam String q) {
+    @GetMapping("/chat/search")
+    public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> searchUsers(@RequestParam String q) {
         return ResponseEntity.ok(chatMessageService.searchUsers(q));
+    }
+
+    @GetMapping("/chat/suggestions/{userId}")
+    public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> getSuggestions(@PathVariable UUID userId) {
+        return ResponseEntity.ok(chatMessageService.getSuggestedContacts(userId));
+    }
+
+    @PostMapping("/chat/read/{recipientId}/{senderId}")
+    public ResponseEntity<Void> markAsRead(@PathVariable UUID recipientId, @PathVariable UUID senderId) {
+        chatMessageService.markMessagesAsRead(recipientId, senderId);
+        return ResponseEntity.ok().build();
     }
 }

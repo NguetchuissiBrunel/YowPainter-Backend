@@ -62,7 +62,9 @@ public class SecurityConfig {
                         "/configuration/security",
                         "/webjars/**",
                         "/error",
-                        "/ws/**"
+                        "/ws/**",
+                        "/api/chat/**",
+                        "/api/messages/**"
                 ).permitAll()
                 .requestMatchers("/api/payment/callback").permitAll()
                 .anyRequest().authenticated()

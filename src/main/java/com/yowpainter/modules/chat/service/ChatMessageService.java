@@ -9,6 +9,7 @@ import com.yowpainter.modules.chat.repository.ChatMessageRepository;
 import com.yowpainter.modules.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,10 +35,29 @@ public class ChatMessageService {
         return chatRoomRepository.findBySenderIdOrRecipientId(userId, userId).stream()
                 .map(room -> {
                     UUID contactId = room.getSender().getId().equals(userId) ? room.getRecipient().getId() : room.getSender().getId();
-                    return appUserRepository.findById(contactId).map(this::mapToUserChatDto).orElse(null);
+                    AppUser contact = appUserRepository.findById(contactId).orElse(null);
+                    if (contact == null) return null;
+
+                    var dto = mapToUserChatDto(contact);
+                    dto.setUnreadCount((int) chatMessageRepository.countByRecipientIdAndSenderIdAndStatus(userId, contactId, com.yowpainter.modules.chat.entity.ChatMessageStatus.SENT));
+                    return dto;
                 })
                 .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<com.yowpainter.modules.chat.dto.UserChatDto> getSuggestedContacts(UUID userId) {
+        // Retourne quelques artistes comme suggestions
+        return appUserRepository.findAll().stream()
+                .filter(u -> u instanceof com.yowpainter.modules.artist.entity.Artist && !u.getId().equals(userId))
+                .limit(5)
+                .map(this::mapToUserChatDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void markMessagesAsRead(UUID recipientId, UUID senderId) {
+        chatMessageRepository.markAsRead(recipientId, senderId);
     }
 
     private com.yowpainter.modules.chat.dto.UserChatDto mapToUserChatDto(AppUser user) {

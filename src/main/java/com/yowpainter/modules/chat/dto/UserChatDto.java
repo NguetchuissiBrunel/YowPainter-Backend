@@ -13,4 +13,5 @@ public class UserChatDto {
     private String profilePictureUrl;
     private String role;
     private String lastMessage;
+    private int unreadCount;
 }
