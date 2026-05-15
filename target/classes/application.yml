@@ -8,13 +8,15 @@ spring:
     name: yowpainter-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:dpg-d7fnn2t7vvec73aedqjg-a}:${DB_PORT:5432}/${DB_NAME:yowpainter_prod}}
-    username: ${DB_USER:yowpainter_user}
-    password: ${DB_PASS:VOb7POs8uaT1gC3Iau9WNkHBt3GD1Mi5}
+    # Connexion à la base de données sur Render.com
+    # Pour le dev local, si l'hôte interne ne marche pas, tu devras utiliser l'External Database URL
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:dpg-d83kv9egvqtc73f3nlq0-a}:${DB_PORT:5432}/${DB_NAME:yowbackend}}
+    username: ${DB_USER:yowbackend_user}
+    password: ${DB_PASS:VNtMmiYQqBU18MrItVoJ1AU7fSCQX2vc}
     driver-class-name: org.postgresql.Driver
     # Propriete importante pour que Hibernate recupere correctement le metadata multi-schema
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 20
       schema: public
 
   jpa:

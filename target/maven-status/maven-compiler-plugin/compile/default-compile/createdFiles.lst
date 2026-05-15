@@ -12,6 +12,7 @@ com\yowpainter\modules\artwork\entity\Artwork.class
 com\yowpainter\modules\auth\dto\BuyerProfileResponse.class
 com\yowpainter\modules\payment\client\CampayClient$WithdrawalRequest$WithdrawalRequestBuilder.class
 com\yowpainter\modules\auth\dto\LoginRequest$LoginRequestBuilder.class
+com\yowpainter\shared\controller\HealthController.class
 com\yowpainter\modules\payment\client\CampayClient$WithdrawalRequest.class
 com\yowpainter\modules\auth\dto\AuthResponse.class
 com\yowpainter\shared\tenant\TenantProvisioningService.class
@@ -58,6 +59,7 @@ com\yowpainter\modules\admin\controller\AdminAuthController.class
 com\yowpainter\modules\artwork\dto\ArtworkResponse.class
 com\yowpainter\modules\chat\entity\ChatMessage.class
 com\yowpainter\modules\auth\dto\UpdateProfilePictureRequest.class
+com\yowpainter\config\AsyncConfig.class
 com\yowpainter\shared\tenant\TenantIdentifierResolver.class
 com\yowpainter\modules\auth\dto\UpdateProfilePictureRequest$UpdateProfilePictureRequestBuilder.class
 com\yowpainter\modules\event\repository\TicketRepository.class
