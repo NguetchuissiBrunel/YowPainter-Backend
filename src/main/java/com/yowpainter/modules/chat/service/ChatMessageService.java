@@ -19,7 +19,38 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomService chatRoomService;
+    private final ChatRoomRepository chatRoomRepository;
     private final AppUserRepository appUserRepository;
+
+    public List<com.yowpainter.modules.chat.dto.UserChatDto> searchUsers(String query) {
+        return appUserRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query, query)
+                .stream()
+                .map(this::mapToUserChatDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<com.yowpainter.modules.chat.dto.UserChatDto> getRecentContacts(UUID userId) {
+        return chatRoomRepository.findBySenderIdOrRecipientId(userId, userId).stream()
+                .map(room -> {
+                    UUID contactId = room.getSenderId().equals(userId) ? room.getRecipientId() : room.getSenderId();
+                    return appUserRepository.findById(contactId).map(this::mapToUserChatDto).orElse(null);
+                })
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private com.yowpainter.modules.chat.dto.UserChatDto mapToUserChatDto(AppUser user) {
+        String name = user.getFirstName() + " " + user.getLastName();
+        if (user instanceof com.yowpainter.modules.artist.entity.Artist artist) {
+            name = artist.getArtistName();
+        }
+        return com.yowpainter.modules.chat.dto.UserChatDto.builder()
+                .id(user.getId())
+                .name(name)
+                .profilePictureUrl(user.getProfilePictureUrl())
+                .role(user.getRole().name())
+                .build();
+    }
 
     public String getRecipientEmail(UUID userId) {
         return appUserRepository.findById(userId)

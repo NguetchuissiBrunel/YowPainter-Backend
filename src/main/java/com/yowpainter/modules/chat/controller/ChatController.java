@@ -42,4 +42,14 @@ public class ChatController {
             @PathVariable UUID recipientId) {
         return ResponseEntity.ok(chatMessageService.findChatMessages(senderId, recipientId));
     }
+
+    @GetMapping("/api/chat/contacts/{userId}")
+    public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> getContacts(@PathVariable UUID userId) {
+        return ResponseEntity.ok(chatMessageService.getRecentContacts(userId));
+    }
+
+    @GetMapping("/api/chat/search")
+    public ResponseEntity<List<com.yowpainter.modules.chat.dto.UserChatDto>> searchUsers(@org.springframework.web.bind.annotation.RequestParam String q) {
+        return ResponseEntity.ok(chatMessageService.searchUsers(q));
+    }
 }
