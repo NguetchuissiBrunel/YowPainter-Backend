@@ -6,6 +6,7 @@ import com.yowpainter.modules.chat.dto.ChatMessageDto;
 import com.yowpainter.modules.chat.entity.ChatMessage;
 import com.yowpainter.modules.chat.entity.ChatMessageStatus;
 import com.yowpainter.modules.chat.repository.ChatMessageRepository;
+import com.yowpainter.modules.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class ChatMessageService {
     public List<com.yowpainter.modules.chat.dto.UserChatDto> getRecentContacts(UUID userId) {
         return chatRoomRepository.findBySenderIdOrRecipientId(userId, userId).stream()
                 .map(room -> {
-                    UUID contactId = room.getSenderId().equals(userId) ? room.getRecipientId() : room.getSenderId();
+                    UUID contactId = room.getSender().getId().equals(userId) ? room.getRecipient().getId() : room.getSender().getId();
                     return appUserRepository.findById(contactId).map(this::mapToUserChatDto).orElse(null);
                 })
                 .filter(java.util.Objects::nonNull)
