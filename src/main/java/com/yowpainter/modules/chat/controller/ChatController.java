@@ -25,9 +25,12 @@ public class ChatController {
     public void processMessage(@Payload ChatMessageDto chatMessageDto) {
         ChatMessageDto savedMessage = chatMessageService.save(chatMessageDto);
         
-        // Destinataire via /user/{recipientId}/queue/messages
+        // On récupère l'email du destinataire pour envoyer au bon "User" STOMP
+        // car Spring Security utilise l'email comme Principal name.
+        String recipientEmail = chatMessageService.getRecipientEmail(chatMessageDto.getRecipientId());
+
         messagingTemplate.convertAndSendToUser(
-                chatMessageDto.getRecipientId().toString(),
+                recipientEmail,
                 "/queue/messages",
                 savedMessage
         );

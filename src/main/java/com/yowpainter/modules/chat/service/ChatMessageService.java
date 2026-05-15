@@ -21,6 +21,12 @@ public class ChatMessageService {
     private final ChatRoomService chatRoomService;
     private final AppUserRepository appUserRepository;
 
+    public String getRecipientEmail(UUID userId) {
+        return appUserRepository.findById(userId)
+                .map(AppUser::getEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+    }
+
     public ChatMessageDto save(ChatMessageDto chatMessageDto) {
         String chatId = chatRoomService
                 .getChatRoomId(chatMessageDto.getSenderId(), chatMessageDto.getRecipientId(), true)
