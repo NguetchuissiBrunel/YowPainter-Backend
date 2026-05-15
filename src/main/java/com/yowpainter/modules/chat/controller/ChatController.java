@@ -22,17 +22,23 @@ public class ChatController {
 
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessageDto chatMessageDto) {
-        ChatMessageDto savedMessage = chatMessageService.save(chatMessageDto);
-        
-        // On récupère l'email du destinataire pour envoyer au bon "User" STOMP
-        // car Spring Security utilise l'email comme Principal name.
-        String recipientEmail = chatMessageService.getRecipientEmail(chatMessageDto.getRecipientId());
+        try {
+            ChatMessageDto savedMessage = chatMessageService.save(chatMessageDto);
+            
+            // On récupère l'email du destinataire pour envoyer au bon "User" STOMP
+            String recipientEmail = chatMessageService.getRecipientEmail(chatMessageDto.getRecipientId());
 
-        messagingTemplate.convertAndSendToUser(
-                recipientEmail,
-                "/queue/messages",
-                savedMessage
-        );
+            System.out.println("CHAT DEBUG: Dispatching message via WebSocket to " + recipientEmail);
+
+            messagingTemplate.convertAndSendToUser(
+                    recipientEmail,
+                    "/queue/messages",
+                    savedMessage
+            );
+        } catch (Exception e) {
+            System.err.println("CHAT ERROR: Failed to process STOMP message: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @GetMapping("/messages/{senderId}/{recipientId}")

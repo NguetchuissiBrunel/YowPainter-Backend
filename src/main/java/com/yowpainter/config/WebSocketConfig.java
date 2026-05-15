@@ -17,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -31,6 +33,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
+    @Override
+    public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        converter.setObjectMapper(objectMapper);
+        messageConverters.add(converter);
+        return false;
+    }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -61,17 +72,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authorization != null && !authorization.isEmpty()) {
                         String authHeader = authorization.get(0);
                         if (authHeader.startsWith("Bearer ")) {
-                            String token = authHeader.substring(7);
-                            String username = jwtService.extractUsername(token);
-                            if (username != null) {
-                                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                                if (jwtService.isTokenValid(token, userDetails)) {
-                                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                            userDetails, null, userDetails.getAuthorities()
-                                    );
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                                    accessor.setUser(authentication);
+                            try {
+                                String token = authHeader.substring(7);
+                                String username = jwtService.extractUsername(token);
+                                if (username != null) {
+                                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                                    if (jwtService.isTokenValid(token, userDetails)) {
+                                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                                userDetails, null, userDetails.getAuthorities()
+                                        );
+                                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                                        accessor.setUser(authentication);
+                                    }
                                 }
+                            } catch (Exception e) {
+                                // Log error but allow message to continue (Security will block later if needed)
+                                System.err.println("WebSocket Auth Error: " + e.getMessage());
                             }
                         }
                     }

@@ -79,7 +79,10 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
     }
 
+    @Transactional
     public ChatMessageDto save(ChatMessageDto chatMessageDto) {
+        System.out.println("CHAT DEBUG: Saving message from " + chatMessageDto.getSenderId() + " to " + chatMessageDto.getRecipientId());
+        
         String chatId = chatRoomService
                 .getChatRoomId(chatMessageDto.getSenderId(), chatMessageDto.getRecipientId(), true)
                 .orElseThrow(() -> new IllegalStateException("Impossible de créer une room"));
