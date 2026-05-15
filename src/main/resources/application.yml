@@ -8,9 +8,11 @@ spring:
     name: yowpainter-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:dpg-d7fnn2t7vvec73aedqjg-a}:${DB_PORT:5432}/${DB_NAME:yowpainter_prod}}
-    username: ${DB_USER:yowpainter_user}
-    password: ${DB_PASS:VOb7POs8uaT1gC3Iau9WNkHBt3GD1Mi5}
+    # Connexion via tunnel SSH : ssh -N -L 5435:127.0.0.1:5432 root@109.199.105.251
+    # Ou connexion directe avec : DB_HOST=109.199.105.251 DB_PORT=5435
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5435}/${DB_NAME:landry_db}}
+    username: ${DB_USER:landry}
+    password: ${DB_PASS:Secret123}
     driver-class-name: org.postgresql.Driver
     # Propriete importante pour que Hibernate recupere correctement le metadata multi-schema
     hikari:
